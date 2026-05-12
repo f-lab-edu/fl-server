@@ -1,0 +1,7 @@
+#pragma once
+
+#define MAX_SOCKBUF 1024
+#define MAX_WORKERTHREAD 4
+
+const UINT16 SERVER_PORT = 11021;
+const UINT16 MAX_CLIENT = 100;

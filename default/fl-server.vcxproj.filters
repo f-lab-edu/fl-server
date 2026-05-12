@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="main">
+      <UniqueIdentifier>{ce8e8737-5109-4099-932b-412e5612adb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="default">
+      <UniqueIdentifier>{f5dac0ae-f88a-4092-a8bb-eaf9d1145ed3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{8372c802-7747-4f06-b97f-c8669d7a0c86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="enums">
+      <UniqueIdentifier>{5a26339f-15ab-4733-bf72-063fd8cf8fb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{58e2e790-3ea9-49f4-99bb-dc595efa974f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="services">
+      <UniqueIdentifier>{c7c68807-8c61-4c53-b9e5-b1ffa9871ab3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="managers">
+      <UniqueIdentifier>{3d008573-e7e6-48c6-8e24-0248b5c1003d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\defines">
+      <UniqueIdentifier>{3bba35f4-5ac2-4d92-b169-1b3c60dc9950}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>default</Filter>
+    </ClCompile>
+    <ClCompile Include="fl-server.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\EchoServer.cpp">
+      <Filter>services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\IOCPServer.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>default</Filter>
+    </ClInclude>
+    <ClInclude Include="Define.h">
+      <Filter>default</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\Enums.h">
+      <Filter>enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\IOOperation.h">
+      <Filter>enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\OverlappedEx.h">
+      <Filter>network\defines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ClientInfo.h">
+      <Filter>network\defines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\Server_Defines.h">
+      <Filter>default</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\IOCPServer.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\EchoServer.h">
+      <Filter>services</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
