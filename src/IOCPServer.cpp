@@ -109,14 +109,38 @@ void IOCPServer::DestroyThread()
 	}
 }
 
+bool IOCPServer::SendMsg(const UINT32 sessionIndex_, const UINT32 dataSize_, shared_ptr<char[]> pData)
+{
+	auto pClient = GetClientInfo(sessionIndex_);
+	return pClient->SendMsg(dataSize_, pData);
+}
+
 void IOCPServer::CreateClient(const UINT32 maxClientCount)
 {
 	for (UINT32 i = 0; i < maxClientCount; i++)
 	{
 		mClientInfos.emplace_back();
 
-		mClientInfos[i].mIndex = i;
+		mClientInfos[i].Init(i);
 	}
+}
+
+stClientInfo* IOCPServer::GetEmptyClientInfo()
+{
+	for (auto& client : mClientInfos)
+	{
+		if (client.IsConnected() == false)
+		{
+			return &client;
+		}
+	}
+
+	return nullptr;
+}
+
+stClientInfo* IOCPServer::GetClientInfo(const UINT32 sessionIndex)
+{
+	return &mClientInfos[sessionIndex];
 }
 
 bool IOCPServer::CreateWorkerThread()
@@ -136,85 +160,6 @@ bool IOCPServer::CreateAccepterThread()
 	mAccepterThread = thread([this]() { AccepterThread(); });
 
 	printf("AccepterThread start");
-	return true;
-}
-
-stClientInfo* IOCPServer::GetEmptyClientInfo()
-{
-	for (auto& client : mClientInfos)
-	{
-		if (INVALID_SOCKET == client.m_socketClient)
-		{
-			return &client;
-		}
-	}
-
-	return nullptr;
-}
-
-bool IOCPServer::BindIOCompletionPort(stClientInfo* pClientInfo)
-{
-	auto hIOCP = CreateIoCompletionPort((HANDLE)pClientInfo->m_socketClient,
-		mIOCPHandle,
-		(ULONG_PTR)(pClientInfo),
-		0);
-
-	if (hIOCP == NULL || hIOCP != mIOCPHandle)
-	{
-		printf("[ERROR] CreateIoCompletionPort() failed : %d\n", GetLastError());
-		return false;
-	}
-
-	return true;
-}
-
-bool IOCPServer::BindRecv(stClientInfo* pClientInfo)
-{
-	DWORD dwFlag = { 0 };
-	DWORD dwRecvNumBytes = { 0 };
-
-	pClientInfo->m_stRecvOverlappedEx.m_wsaBuf.len = MAX_SOCKBUF;
-	pClientInfo->m_stRecvOverlappedEx.m_wsaBuf.buf = pClientInfo->mRecvBuf;
-	pClientInfo->m_stRecvOverlappedEx.m_eOperation = IOOperation::RECV;
-
-	int nRet = WSARecv(pClientInfo->m_socketClient,
-		&(pClientInfo->m_stRecvOverlappedEx.m_wsaBuf),
-		1,
-		&dwRecvNumBytes,
-		&dwFlag,
-		(LPWSAOVERLAPPED) & (pClientInfo->m_stRecvOverlappedEx),
-		NULL);
-
-	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
-	{
-		printf("[ERROR] WSARecv() failed : %d\n", WSAGetLastError());
-		return false;
-	}
-
-	return true;
-}
-
-bool IOCPServer::SendMsg(stClientInfo* pClientInfo, char* pMsg, int nLen)
-{
-	DWORD dwRecvNumBytes = { 0 };
-
-	CopyMemory(pClientInfo->mSendBuf, pMsg, nLen);
-	pClientInfo->mSendBuf[nLen] = '\0';
-
-	int nRet = WSASend(pClientInfo->m_socketClient,
-		&(pClientInfo->m_stSendOverlappedEx.m_wsaBuf),
-		1,
-		&dwRecvNumBytes,
-		0,
-		(LPWSAOVERLAPPED) & (pClientInfo->m_stSendOverlappedEx),
-		NULL);
-
-	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
-	{
-		printf("[ERROR] WSASend() failed : %d\n", WSAGetLastError());
-		return false;
-	}
-
 	return true;
 }
 
@@ -246,7 +191,7 @@ void IOCPServer::WorkerThread()
 
 		if (bSuccess == FALSE || (dwIoSize == 0 && bSuccess == TRUE))
 		{
-			printf("socket(%d) connection lost\n", (int)pClientInfo->m_socketClient);
+			printf("socket(%d) connection lost\n", (int)pClientInfo->GetSock());
 			CloseSocket(pClientInfo);
 			continue;
 		}
@@ -255,22 +200,21 @@ void IOCPServer::WorkerThread()
 
 		if (IOOperation::RECV == pOverlappedEx->m_eOperation)
 		{
-			OnReceive(pClientInfo->mIndex, dwIoSize, pClientInfo->mRecvBuf);
+			OnReceive(pClientInfo->GetIndex(), dwIoSize, pClientInfo->RecvBuffer());
 
-			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo->mRecvBuf);
+			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo->RecvBuffer());
 
-			//echo
-			//task
-
-			BindRecv(pClientInfo);
+			pClientInfo->BindRecv();
 		}
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
-			printf("[SEND] bytes : %d , msg : %s\n", dwIoSize, pClientInfo->mSendBuf);
+			delete[] pOverlappedEx->m_wsaBuf.buf;
+			delete pOverlappedEx;
+			pClientInfo->SendCompleted(dwIoSize);
 		}
 		else
 		{
-			printf("[EXCEPTION] socket(%d)\n", (int)pClientInfo->m_socketClient);
+			printf("[EXCEPTION] socket(%d)\n", pClientInfo->GetIndex());
 		}
 	}
 }
@@ -289,29 +233,23 @@ void IOCPServer::AccepterThread()
 			return;
 		}
 
-		pClientInfo->m_socketClient = accept(mListenSocket, (SOCKADDR*)&stClientAddr, &nAddrLen);
-		if (pClientInfo->m_socketClient == INVALID_SOCKET)
+		auto newSocket = accept(mListenSocket, (SOCKADDR*)&stClientAddr, &nAddrLen);
+		if (newSocket == INVALID_SOCKET)
 		{
 			continue;
 		}
 
-		bool bRet = BindIOCompletionPort(pClientInfo);
-		if (bRet == false)
+		if (pClientInfo->OnConnect(mIOCPHandle, newSocket) == false)
 		{
-			return;
-		}
-
-		bRet = BindRecv(pClientInfo);
-		if (bRet == false)
-		{
+			pClientInfo->Close(true);
 			return;
 		}
 
 		char clientIP[32] = { 0, };
 		inet_ntop(AF_INET, &(stClientAddr.sin_addr), clientIP, 32 - 1);
-		printf("Client Connected : IP(%s) SOCKET(%d)\n", clientIP, (int)pClientInfo->m_socketClient);
+		printf("Client Connected : IP(%s) SOCKET(%d)\n", clientIP, (int)pClientInfo->GetSock());
 
-		OnConnect(pClientInfo->mIndex);
+		OnConnect(pClientInfo->GetIndex());
 
 		++mClientCnt;
 	}
@@ -319,23 +257,9 @@ void IOCPServer::AccepterThread()
 
 void IOCPServer::CloseSocket(stClientInfo* pClientInfo, bool bIsForce)
 {
-	auto clientIndex = pClientInfo->mIndex;
+	auto clientIndex = pClientInfo->GetIndex();
 
-	linger stLinger = { 0, 0 }; // SO_DONTLINGER
-
-	// bIsForce == true :: SO_LINGER, timeout = 0 // force shutdown, warning : data lost
-	if (bIsForce == true)
-	{
-		stLinger.l_onoff = 1;
-	}
-
-	shutdown(pClientInfo->m_socketClient, SD_BOTH);
-
-	setsockopt(pClientInfo->m_socketClient, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
-
-	closesocket(pClientInfo->m_socketClient);
-
-	pClientInfo->m_socketClient = INVALID_SOCKET;
+	pClientInfo->Close(bIsForce);
 
 	OnClose(clientIndex);
 }

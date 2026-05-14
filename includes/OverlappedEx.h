@@ -1,8 +1,6 @@
 #pragma once
 #include "IOOperation.h"
 
-struct IOOperation;
-
 struct stOverlappedEx
 {
 	WSAOVERLAPPED m_wsaOverlapped;

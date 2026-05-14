@@ -23,22 +23,19 @@ public:
 	bool BindandListen(int nBindPort);
 	bool StartServer(const UINT32 maxClientCount);
 	void DestroyThread();
+	bool SendMsg(const UINT32 sessionIndex_, const UINT32 dataSize_, shared_ptr<char[]> pData);
 
 	virtual void OnConnect(const UINT32 clientIndex_) = 0;
 	virtual void OnClose(const UINT32 clientIndex_) = 0;
-	virtual void OnReceive(const UINT32 clientIndex_, const UINT32 size_, char* pData_) = 0;
+	virtual void OnReceive(const UINT32 clientIndex_, const UINT32 size_, shared_ptr<char[]> pData_) = 0;
 
 private:
 	void CreateClient(const UINT32 maxClientCount);
+	stClientInfo* GetEmptyClientInfo();
+	stClientInfo* GetClientInfo(const UINT32 sessionIndex);
+
 	bool CreateWorkerThread();
 	bool CreateAccepterThread();
-
-	stClientInfo* GetEmptyClientInfo();
-
-	bool BindIOCompletionPort(stClientInfo* pClientInfo);
-
-	bool BindRecv(stClientInfo* pClientInfo);
-	bool SendMsg(stClientInfo* pClientInfo, char* pMsg, int nLen);
 
 	void WorkerThread();
 
@@ -63,6 +60,4 @@ private:
 	bool mIsWorkerRun = true;
 
 	bool mIsAccepterRun = true;
-
-	char mSocketBuf[1024] = { 0, };
 };

@@ -39,6 +39,12 @@
     <ClCompile Include="..\src\IOCPServer.cpp">
       <Filter>network</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ClientInfo.cpp">
+      <Filter>network\defines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Packet.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -67,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="..\includes\EchoServer.h">
       <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\Packet.h">
+      <Filter>models</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

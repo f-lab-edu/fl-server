@@ -24,6 +24,6 @@ int main()
 		}
 	}
 
-	server.DestroyThread();
+	server.End();
 	return 0;
 }
