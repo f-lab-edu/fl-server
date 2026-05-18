@@ -63,7 +63,7 @@ private:
 	stOverlappedEx mRecvOverlappedEx;
 	stOverlappedEx mSendOverlappedEx;
 
-	shared_ptr<char[MAX_SOCKBUF]> mRecvBuf = {};
+	shared_ptr<char[]> mRecvBuf = {};
 
 	mutex mSendLock;
 	bool mIsSending = false;

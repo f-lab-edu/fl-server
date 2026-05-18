@@ -6,6 +6,7 @@ stClientInfo::stClientInfo()
 {
 	ZeroMemory(&mRecvOverlappedEx, sizeof(stOverlappedEx));
 	mSocket = INVALID_SOCKET;
+	mRecvBuf = make_shared<char[]>(MAX_SOCKBUF);
 	ZeroMemory(mRecvBuf.get(), MAX_SOCKBUF);
 }
 

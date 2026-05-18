@@ -50,7 +50,7 @@ void EchoServer::ProcessPacket()
 		auto packetData = DequePacketData();
 		if (packetData.DataSize != 0)
 		{
-			SendMsg(packetData.SessionIndex, packetData.DataSize, packetData.pPacketData);
+			SendMsg(packetData.ClientIndex, packetData.DataSize, packetData.pPacketData);
 		}
 		else
 		{

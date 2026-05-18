@@ -1,10 +1,9 @@
 #include "pch.h"
-
 #include "Packet.h"
 
 void PacketData::Set(PacketData& value)
 {
-	SessionIndex = value.SessionIndex;
+	ClientIndex = value.ClientIndex;
 	DataSize = value.DataSize;
 
 	pPacketData = make_shared<char[]>(value.DataSize);
@@ -13,7 +12,7 @@ void PacketData::Set(PacketData& value)
 
 void PacketData::Set(UINT32 sessionIndex_, UINT32 dataSize_, shared_ptr<char[]> pData)
 {
-	SessionIndex = sessionIndex_;
+	ClientIndex = sessionIndex_;
 	DataSize = dataSize_;
 
 	pPacketData = make_shared<char[]>(dataSize_);

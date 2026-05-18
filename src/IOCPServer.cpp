@@ -167,7 +167,7 @@ bool IOCPServer::CreateWorkerThread()
 	unsigned int uiThreadId = { 0 };
 
 	// WaitingThread Queue에 대기 상태로 권장되는 쓰레드 개수 : (cpu 개수 * 2 + 1)
-	for (int i = 0; i < MaxIOWorkerThreadCount; i++)
+	for (UINT32 i = 0; i < MaxIOWorkerThreadCount; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WorkerThread(); });
 	}
@@ -304,6 +304,9 @@ void IOCPServer::SendThread()
 
 void IOCPServer::CloseSocket(shared_ptr<stClientInfo> pClientInfo, bool bIsForce)
 {
+	if (pClientInfo->IsConnected() == false)
+		return;
+
 	auto clientIndex = pClientInfo->GetIndex();
 
 	pClientInfo->Close(bIsForce);
