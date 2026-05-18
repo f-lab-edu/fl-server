@@ -19,7 +19,7 @@ public:
 
 	virtual ~IOCPServer();
 
-	bool InitSocket();
+	bool Init(const UINT32 maxIOWorkerThreadCount_);
 	bool BindandListen(int nBindPort);
 	bool StartServer(const UINT32 maxClientCount);
 	void DestroyThread();
@@ -49,6 +49,8 @@ private:
 	
 
 private:
+	UINT32 MaxIOWorkerThreadCount = { 0 };
+
 	vector<shared_ptr<stClientInfo>> mClientInfos;
 
 	SOCKET mListenSocket = INVALID_SOCKET;
