@@ -31,33 +31,38 @@ public:
 
 private:
 	void CreateClient(const UINT32 maxClientCount);
-	stClientInfo* GetEmptyClientInfo();
-	stClientInfo* GetClientInfo(const UINT32 sessionIndex);
+	shared_ptr<stClientInfo> GetEmptyClientInfo();
+	shared_ptr<stClientInfo> GetClientInfo(const UINT32 sessionIndex);
 
 	bool CreateWorkerThread();
 	bool CreateAccepterThread();
+
+	void CreateSendThread();
 
 	void WorkerThread();
 
 	void AccepterThread();
 
-	void CloseSocket(stClientInfo* pClientInfo, bool bIsForce = false);
+	void SendThread();
+
+	void CloseSocket(shared_ptr<stClientInfo> pClientInfo, bool bIsForce = false);
 	
 
 private:
-	vector<stClientInfo> mClientInfos;
+	vector<shared_ptr<stClientInfo>> mClientInfos;
 
 	SOCKET mListenSocket = INVALID_SOCKET;
 
 	int mClientCnt = { 0 };
 
-	vector<thread> mIOWorkerThreads;
-
-	thread mAccepterThread;
-
 	HANDLE mIOCPHandle = INVALID_HANDLE_VALUE;
 
 	bool mIsWorkerRun = true;
-
+	vector<thread> mIOWorkerThreads;
+	
 	bool mIsAccepterRun = true;
+	thread mAccepterThread;
+	
+	bool mIsSenderRun = false;
+	thread mSendThread;
 };
