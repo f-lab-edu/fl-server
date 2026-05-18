@@ -4,7 +4,8 @@
 void User::Init(const UINT32 index)
 {
 	mIndex = index;
-	mPacketDataBuffer = make_shared<char[]>(PACKET_DATA_BUFFER_SIZE);
+
+	mPacketBuffer.Init(PACKET_DATA_BUFFER_SIZE);
 }
 
 void User::Clear()
@@ -14,8 +15,7 @@ void User::Clear()
 	mIsConfirm = { false };
 	mCurDomainState = DOMAIN_STATE::NONE;
 
-	mPacketDataBufferWPos = { 0 };
-	mPacketDataBufferRPos = { 0 };
+	mPacketBuffer.Clear();
 }
 
 int User::SetLogin(shared_ptr<char> userID_)
@@ -34,9 +34,10 @@ void User::EnterRoom(INT32 roomIndex_)
 
 void User::SetPacketData(const UINT32 dataSize_, shared_ptr<char> pData_)
 {
+	mPacketBuffer.SetPacketData(dataSize_, pData_);
 }
 
 PacketInfo User::GetPacket()
 {
-	return PacketInfo();
+	return mPacketBuffer.GetPacket();
 }
