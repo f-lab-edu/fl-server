@@ -147,6 +147,7 @@
     <ClCompile Include="..\src\IOCPServer.cpp" />
     <ClCompile Include="..\src\Packet.cpp" />
     <ClCompile Include="..\src\PacketBuffer.cpp" />
+    <ClCompile Include="..\src\PacketManager.cpp" />
     <ClCompile Include="..\src\User.cpp" />
     <ClCompile Include="..\src\UserManager.cpp" />
     <ClCompile Include="fl-server.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="..\includes\PacketHeader.h" />
     <ClInclude Include="..\includes\PacketId.h" />
     <ClInclude Include="..\includes\PacketInfo.h" />
+    <ClInclude Include="..\includes\PacketManager.h" />
     <ClInclude Include="..\includes\RoomChatPacket.h" />
     <ClInclude Include="..\includes\RoomPacket.h" />
     <ClInclude Include="..\includes\Server_Defines.h" />
