@@ -3,6 +3,8 @@
 #pragma comment(lib, "ws2_32")
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#pragma comment(lib, "mswsock.lib")
+#include <mswsock.h>
 
 #include "spdlog/spdlog.h"
 
