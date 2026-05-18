@@ -83,12 +83,29 @@ bool IOCPServer::StartServer(const UINT32 maxClientCount)
 		return false;
 	}
 
+	CreateSendThread();
+
 	printf("server start\n");
 	return true;
 }
 
 void IOCPServer::DestroyThread()
 {
+	mIsSenderRun = false;
+
+	if (mSendThread.joinable())
+	{
+		mSendThread.join();
+	}
+
+	mIsAccepterRun = false;
+	closesocket(mListenSocket);
+
+	if (mAccepterThread.joinable())
+	{
+		mAccepterThread.join();
+	}
+
 	mIsWorkerRun = false;
 	CloseHandle(mIOCPHandle);
 
@@ -98,14 +115,6 @@ void IOCPServer::DestroyThread()
 		{
 			th.join();
 		}
-	}
-
-	mIsAccepterRun = false;
-	closesocket(mListenSocket);
-
-	if (mAccepterThread.joinable())
-	{
-		mAccepterThread.join();
 	}
 }
 
@@ -119,33 +128,35 @@ void IOCPServer::CreateClient(const UINT32 maxClientCount)
 {
 	for (UINT32 i = 0; i < maxClientCount; i++)
 	{
-		mClientInfos.emplace_back();
+		auto client = make_shared<stClientInfo>();
+		client.get()->Init(i);
 
-		mClientInfos[i].Init(i);
+		mClientInfos.push_back(client);
 	}
 }
 
-stClientInfo* IOCPServer::GetEmptyClientInfo()
+shared_ptr<stClientInfo> IOCPServer::GetEmptyClientInfo()
 {
 	for (auto& client : mClientInfos)
 	{
-		if (client.IsConnected() == false)
+		if (client.get()->IsConnected() == false)
 		{
-			return &client;
+			return client;
 		}
 	}
 
 	return nullptr;
 }
 
-stClientInfo* IOCPServer::GetClientInfo(const UINT32 sessionIndex)
+shared_ptr<stClientInfo> IOCPServer::GetClientInfo(const UINT32 sessionIndex)
 {
-	return &mClientInfos[sessionIndex];
+	return mClientInfos[sessionIndex];
 }
 
 bool IOCPServer::CreateWorkerThread()
 {
-	unsigned int uiThreadId = 0;
+	mIsWorkerRun = true;
+
 	for (int i = 0; i < MAX_WORKERTHREAD; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WorkerThread(); });
@@ -157,15 +168,23 @@ bool IOCPServer::CreateWorkerThread()
 
 bool IOCPServer::CreateAccepterThread()
 {
+	mIsAccepterRun = true;
 	mAccepterThread = thread([this]() { AccepterThread(); });
 
 	printf("AccepterThread start");
 	return true;
 }
 
+void IOCPServer::CreateSendThread()
+{
+	mIsSenderRun = true;
+	mSendThread = thread([this]() { SendThread(); });
+	printf("SenderThread start");
+}
+
 void IOCPServer::WorkerThread()
 {
-	stClientInfo* pClientInfo = nullptr;
+	shared_ptr<stClientInfo> pClientInfo = nullptr;
 	BOOL bSuccess = TRUE;
 	DWORD dwIoSize = { 0 };
 	LPOVERLAPPED lpOverlapped = NULL;
@@ -202,7 +221,7 @@ void IOCPServer::WorkerThread()
 		{
 			OnReceive(pClientInfo->GetIndex(), dwIoSize, pClientInfo->RecvBuffer());
 
-			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo->RecvBuffer());
+			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo.get()->RecvBuffer());
 
 			pClientInfo->BindRecv();
 		}
@@ -226,7 +245,7 @@ void IOCPServer::AccepterThread()
 
 	while (mIsAccepterRun)
 	{
-		stClientInfo* pClientInfo = GetEmptyClientInfo();
+		shared_ptr<stClientInfo> pClientInfo = GetEmptyClientInfo();
 		if (pClientInfo == NULL)
 		{
 			printf("[ERROR] Client Full\n");
@@ -255,7 +274,23 @@ void IOCPServer::AccepterThread()
 	}
 }
 
-void IOCPServer::CloseSocket(stClientInfo* pClientInfo, bool bIsForce)
+void IOCPServer::SendThread()
+{
+	while (mIsSenderRun)
+	{
+		for (auto client : mClientInfos)
+		{
+			if (client->IsConnected() == false)
+				continue;
+
+			client->SendIO();
+		}
+
+		this_thread::sleep_for(chrono::milliseconds(8));
+	}
+}
+
+void IOCPServer::CloseSocket(shared_ptr<stClientInfo> pClientInfo, bool bIsForce)
 {
 	auto clientIndex = pClientInfo->GetIndex();
 

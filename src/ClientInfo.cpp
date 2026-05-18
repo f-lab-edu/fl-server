@@ -2,6 +2,13 @@
 
 #include "ClientInfo.h"
 
+stClientInfo::stClientInfo()
+{
+	ZeroMemory(&mRecvOverlappedEx, sizeof(stOverlappedEx));
+	mSock = INVALID_SOCKET;
+	ZeroMemory(mRecvBuf.get(), MAX_SOCKBUF);
+}
+
 void stClientInfo::Init(const UINT32 index)
 {
 	mIndex = index;
@@ -42,6 +49,8 @@ void stClientInfo::Close(bool bIsForce)
 
 void stClientInfo::Clear()
 {
+	mSendPos = 0;
+	mIsSending = false;
 }
 
 bool stClientInfo::BindIOCompletionPort(HANDLE iocpHandle_)
@@ -88,21 +97,41 @@ bool stClientInfo::BindRecv()
 
 bool stClientInfo::SendMsg(const UINT32 dataSize_, shared_ptr<char[]> pMsg_)
 {
-	auto sendOverlappedEx = new stOverlappedEx;
-	ZeroMemory(sendOverlappedEx, sizeof(stOverlappedEx));
-	sendOverlappedEx->m_wsaBuf.len = dataSize_;
-	sendOverlappedEx->m_wsaBuf.buf = new char[dataSize_];
-	CopyMemory(sendOverlappedEx->m_wsaBuf.buf, pMsg_.get(), dataSize_);
-	sendOverlappedEx->m_eOperation = IOOperation::SEND;
+	lock_guard<mutex> guard(mSendLock);
+
+	if ((mSendPos + dataSize_) > MAX_SOCK_SENDBUF)
+		mSendPos = 0;
+
+	auto pSendBuf = &mSendBuf[mSendPos];
+
+	CopyMemory(pSendBuf, pMsg_.get(), dataSize_);
+	mSendPos += dataSize_;
+
+	return true;
+}
+
+bool stClientInfo::SendIO()
+{
+	if (mSendPos <= 0 || mIsSending)
+		return true;
+
+	lock_guard<mutex> guard(mSendLock);
+
+	mIsSending = true;
+
+	CopyMemory(mSendingBuf, &mSendBuf[0], mSendPos);
+
+	mSendOverlappedEx.m_wsaBuf.len = mSendPos;
+	mSendOverlappedEx.m_wsaBuf.buf = &mSendingBuf[0];
+	mSendOverlappedEx.m_eOperation = IOOperation::SEND;
 
 	DWORD dwRecvNumBytes = { 0 };
-
 	int nRet = WSASend(mSock,
-		&(sendOverlappedEx->m_wsaBuf),
+		&(mSendOverlappedEx.m_wsaBuf),
 		1,
 		&dwRecvNumBytes,
 		0,
-		(LPWSAOVERLAPPED) & (sendOverlappedEx),
+		(LPWSAOVERLAPPED) & (mSendOverlappedEx),
 		NULL);
 
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
@@ -111,10 +140,12 @@ bool stClientInfo::SendMsg(const UINT32 dataSize_, shared_ptr<char[]> pMsg_)
 		return false;
 	}
 
+	mSendPos = 0;
 	return true;
 }
 
 void stClientInfo::SendCompleted(const UINT32 dataSize_)
 {
+	mIsSending = false;
 	printf("[Send Completed] bytes : %d\n", dataSize_);
 }
