@@ -14,13 +14,15 @@ public:
 	
 	~stClientInfo() = default;
 
-	void Init(const UINT32 index);
+	void Init(const UINT32 index, HANDLE iocpHandle_);
 	
 	UINT32 GetIndex() { return mIndex; }
 
-	bool IsConnected() { return mSock != INVALID_SOCKET; }
+	bool IsConnected() { return mIsConnect == 1; }
 
-	SOCKET GetSock() { return mSock; }
+	SOCKET GetSock() { return mSocket; }
+
+	UINT64 GetLastestClosedTimeSec() { return mLastestClosedTimeSec; }
 
 	shared_ptr<char[]> RecvBuffer() { return mRecvBuf; }
 
@@ -29,6 +31,10 @@ public:
 	void Close(bool bIsForce = false);
 
 	void Clear();
+
+	bool PostAccept(SOCKET listenSock_, const UINT64 curTimeSec_);
+
+	bool AcceptCompletion();
 
 	bool BindIOCompletionPort(HANDLE iocpHandle_);
 	
@@ -40,9 +46,20 @@ public:
 
 	void SendCompleted(const UINT32 dataSize_);
 
+	bool SetSocketOption();
+
 private:
 	INT32 mIndex = { 0 };
-	SOCKET mSock;
+	HANDLE mIOCPHandle = { INVALID_HANDLE_VALUE };
+
+	INT64 mIsConnect = 0;
+	UINT64 mLastestClosedTimeSec = 0;
+
+	SOCKET mSocket;
+
+	stOverlappedEx mAcceptContext;
+	char mAcceptBuf[64] = {};
+
 	stOverlappedEx mRecvOverlappedEx;
 	stOverlappedEx mSendOverlappedEx;
 

@@ -6,7 +6,7 @@ int main()
 {
 	EchoServer server;
 
-	server.InitSocket();
+	server.Init(MAX_IO_WORKER_THREAD);
 
 	server.BindandListen(SERVER_PORT);
 
