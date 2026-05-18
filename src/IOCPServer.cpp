@@ -11,7 +11,7 @@ IOCPServer::~IOCPServer()
 	WSACleanup();
 }
 
-bool IOCPServer::InitSocket()
+bool IOCPServer::Init(const UINT32 maxIOWorkerThreadCount_)
 {
 	WSADATA wsaData;
 
@@ -30,6 +30,8 @@ bool IOCPServer::InitSocket()
 		printf("[ERROR] socket() failed : %d\n", WSAGetLastError());
 		return false;
 	}
+
+	MaxIOWorkerThreadCount = maxIOWorkerThreadCount_;
 
 	printf("init complete\n");
 	return true;
@@ -56,6 +58,20 @@ bool IOCPServer::BindandListen(int nBindPort)
 		return false;
 	}
 
+	mIOCPHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, MaxIOWorkerThreadCount);
+	if (mIOCPHandle == NULL)
+	{
+		printf("[ERROR] CreateIoCompletionPort() failed: %d", GetLastError());
+		return false;
+	}
+
+	auto hIOCPHandle = CreateIoCompletionPort((HANDLE)mListenSocket, mIOCPHandle, (UINT32)0, 0);
+	if (hIOCPHandle == nullptr)
+	{
+		printf("[ERROR] failed bind listen socket IOCP : %d", WSAGetLastError());
+		return false;
+	}
+
 	printf("server register complete\n");
 	return true;
 }
@@ -63,13 +79,6 @@ bool IOCPServer::BindandListen(int nBindPort)
 bool IOCPServer::StartServer(const UINT32 maxClientCount)
 {
 	CreateClient(maxClientCount);
-
-	mIOCPHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, MAX_WORKERTHREAD);
-	if (mIOCPHandle == NULL)
-	{
-		printf("[ERROR] CreateIoCompletionport() failed : %d\n", GetLastError());
-		return false;
-	}
 
 	bool bRet = CreateWorkerThread();
 	if (bRet == false)
@@ -129,7 +138,7 @@ void IOCPServer::CreateClient(const UINT32 maxClientCount)
 	for (UINT32 i = 0; i < maxClientCount; i++)
 	{
 		auto client = make_shared<stClientInfo>();
-		client.get()->Init(i);
+		client->Init(i, mIOCPHandle);
 
 		mClientInfos.push_back(client);
 	}
@@ -155,9 +164,10 @@ shared_ptr<stClientInfo> IOCPServer::GetClientInfo(const UINT32 sessionIndex)
 
 bool IOCPServer::CreateWorkerThread()
 {
-	mIsWorkerRun = true;
+	unsigned int uiThreadId = { 0 };
 
-	for (int i = 0; i < MAX_WORKERTHREAD; i++)
+	// WaitingThread Queue에 대기 상태로 권장되는 쓰레드 개수 : (cpu 개수 * 2 + 1)
+	for (int i = 0; i < MaxIOWorkerThreadCount; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WorkerThread(); });
 	}
@@ -208,27 +218,40 @@ void IOCPServer::WorkerThread()
 			continue;
 		}
 
-		if (bSuccess == FALSE || (dwIoSize == 0 && bSuccess == TRUE))
+		auto pOverlappedEx = (stOverlappedEx*)lpOverlapped;
+
+		if (bSuccess == FALSE || (dwIoSize == 0 && pOverlappedEx->m_eOperation != IOOperation::ACCEPT))
 		{
 			printf("socket(%d) connection lost\n", (int)pClientInfo->GetSock());
 			CloseSocket(pClientInfo);
 			continue;
 		}
 
-		auto pOverlappedEx = (stOverlappedEx*)lpOverlapped;
 
-		if (IOOperation::RECV == pOverlappedEx->m_eOperation)
+		if (pOverlappedEx->m_eOperation == IOOperation::ACCEPT)
+		{
+			pClientInfo = GetClientInfo(pOverlappedEx->SessionIndex);
+			if (pClientInfo->AcceptCompletion())
+			{
+				++mClientCnt;
+
+				OnConnect(pClientInfo->GetIndex());
+			}
+			else
+			{
+				CloseSocket(pClientInfo, true);
+			}
+		}
+		else if (IOOperation::RECV == pOverlappedEx->m_eOperation)
 		{
 			OnReceive(pClientInfo->GetIndex(), dwIoSize, pClientInfo->RecvBuffer());
 
-			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo.get()->RecvBuffer());
+			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo->RecvBuffer().get());
 
 			pClientInfo->BindRecv();
 		}
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
-			delete[] pOverlappedEx->m_wsaBuf.buf;
-			delete pOverlappedEx;
 			pClientInfo->SendCompleted(dwIoSize);
 		}
 		else
@@ -240,37 +263,26 @@ void IOCPServer::WorkerThread()
 
 void IOCPServer::AccepterThread()
 {
-	SOCKADDR_IN stClientAddr;
-	int nAddrLen = sizeof(SOCKADDR_IN);
-
 	while (mIsAccepterRun)
 	{
-		shared_ptr<stClientInfo> pClientInfo = GetEmptyClientInfo();
-		if (pClientInfo == NULL)
+		auto curTimeSec = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now().time_since_epoch()).count();
+
+		for (auto client : mClientInfos)
 		{
-			printf("[ERROR] Client Full\n");
-			return;
+			if (client->IsConnected())
+				continue;
+
+			if ((UINT64)curTimeSec < client->GetLastestClosedTimeSec())
+				continue;
+			
+			auto diff = curTimeSec - client->GetLastestClosedTimeSec();
+			if (diff <= RE_USE_SESSION_WAIT_TIMESEC)
+				continue;
+
+			client->PostAccept(mListenSocket, curTimeSec);
 		}
 
-		auto newSocket = accept(mListenSocket, (SOCKADDR*)&stClientAddr, &nAddrLen);
-		if (newSocket == INVALID_SOCKET)
-		{
-			continue;
-		}
-
-		if (pClientInfo->OnConnect(mIOCPHandle, newSocket) == false)
-		{
-			pClientInfo->Close(true);
-			return;
-		}
-
-		char clientIP[32] = { 0, };
-		inet_ntop(AF_INET, &(stClientAddr.sin_addr), clientIP, 32 - 1);
-		printf("Client Connected : IP(%s) SOCKET(%d)\n", clientIP, (int)pClientInfo->GetSock());
-
-		OnConnect(pClientInfo->GetIndex());
-
-		++mClientCnt;
+		this_thread::sleep_for(chrono::milliseconds(32));
 	}
 }
 
