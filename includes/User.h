@@ -38,8 +38,6 @@ private:
 
 	DOMAIN_STATE::Enum mCurDomainState = { DOMAIN_STATE::NONE };
 
-	UINT32 mPacketDataBufferWPos = { 0 };
-	UINT32 mPacketDataBufferRPos = { 0 };
-	shared_ptr<char[]> mPacketDataBuffer;
+	PacketBuffer mPacketBuffer = {};
 };
 

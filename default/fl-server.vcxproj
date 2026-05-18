@@ -146,6 +146,7 @@
     <ClCompile Include="..\src\EchoServer.cpp" />
     <ClCompile Include="..\src\IOCPServer.cpp" />
     <ClCompile Include="..\src\Packet.cpp" />
+    <ClCompile Include="..\src\PacketBuffer.cpp" />
     <ClCompile Include="..\src\User.cpp" />
     <ClCompile Include="fl-server.cpp" />
     <ClCompile Include="pch.cpp">
@@ -164,6 +165,7 @@
     <ClInclude Include="..\includes\LoginPacket.h" />
     <ClInclude Include="..\includes\OverlappedEx.h" />
     <ClInclude Include="..\includes\Packet.h" />
+    <ClInclude Include="..\includes\PacketBuffer.h" />
     <ClInclude Include="..\includes\PacketHeader.h" />
     <ClInclude Include="..\includes\PacketId.h" />
     <ClInclude Include="..\includes\PacketInfo.h" />
