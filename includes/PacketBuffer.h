@@ -6,7 +6,7 @@ public:
 	void Init(UINT32 bufferSize_);
 	void Clear();
 
-	void SetPacketData(const UINT32 dataSize_, shared_ptr<char> pData_);
+	void SetPacketData(const UINT32 dataSize_, shared_ptr<char[]> pData_);
 	PacketInfo GetPacket();
 
 	char* GetPtr(UINT32 offset = 0);

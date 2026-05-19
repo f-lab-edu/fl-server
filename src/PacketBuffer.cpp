@@ -13,7 +13,7 @@ void PacketBuffer::Clear()
 	mPacketDataBufferRPos = { 0 };
 }
 
-void PacketBuffer::SetPacketData(const UINT32 dataSize_, shared_ptr<char> pData_)
+void PacketBuffer::SetPacketData(const UINT32 dataSize_, shared_ptr<char[]> pData_)
 {
 	if ((mPacketDataBufferWPos + dataSize_) >= PACKET_DATA_BUFFER_SIZE)
 	{

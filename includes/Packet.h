@@ -4,11 +4,9 @@
 
 #include "PacketInfo.h"
 
-#pragma pack(push,1)
 #include "LoginPacket.h"
 #include "RoomPacket.h"
 #include "RoomChatPacket.h"
-#pragma pack(pop)
 
 struct PacketData
 {
