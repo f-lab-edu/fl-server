@@ -1,5 +1,7 @@
 #pragma once
 
+struct PacketInfo;
+
 class PacketBuffer
 {
 public:

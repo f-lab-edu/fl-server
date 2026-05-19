@@ -12,7 +12,7 @@ int main()
 
 	server.Run(MAX_CLIENT);
 
-	printf("quit : enter 'quit'");
+	printf("quit : enter 'quit'\n");
 	while (true)
 	{
 		string inputCmd;
