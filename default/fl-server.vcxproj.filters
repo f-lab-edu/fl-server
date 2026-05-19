@@ -46,11 +46,20 @@
     <Filter Include="Network\Buffers">
       <UniqueIdentifier>{74d28019-b9a2-4be2-a408-e7b968bfd32b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Network\Buffers\RecvBuffer">
-      <UniqueIdentifier>{2fa977c1-dce8-4866-b966-30bd3218f400}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Network\Buffers\PacketBuffer">
       <UniqueIdentifier>{93ed76b1-48cc-449d-ba15-47df779e3e82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\ChatServer">
+      <UniqueIdentifier>{28a16e53-8bd1-46ca-af60-65ca78ecad01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\EchoServer">
+      <UniqueIdentifier>{d8b67ad1-4c17-4bd5-9051-b0af1a26ae0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\PacketManager">
+      <UniqueIdentifier>{e775c404-02f3-45b4-8235-0e3614b662d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\UserManager">
+      <UniqueIdentifier>{0d48b6d7-fc05-4227-991d-a69fa6f1b6af}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -59,9 +68,6 @@
     </ClCompile>
     <ClCompile Include="fl-server.cpp">
       <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\EchoServer.cpp">
-      <Filter>Services</Filter>
     </ClCompile>
     <ClCompile Include="..\src\IOCPServer.cpp">
       <Filter>Network</Filter>
@@ -74,6 +80,21 @@
     </ClCompile>
     <ClCompile Include="..\src\ClientInfo.cpp">
       <Filter>Network\ClientInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ChatServer.cpp">
+      <Filter>Services\ChatServer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\EchoServer.cpp">
+      <Filter>Services\EchoServer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PacketBuffer.cpp">
+      <Filter>Network\Buffers\PacketBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PacketManager.cpp">
+      <Filter>Managers\PacketManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UserManager.cpp">
+      <Filter>Managers\UserManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,9 +115,6 @@
     </ClInclude>
     <ClInclude Include="..\includes\IOCPServer.h">
       <Filter>Network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\includes\EchoServer.h">
-      <Filter>Services</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ErrorCode.h">
       <Filter>Default\Enums</Filter>
@@ -133,6 +151,24 @@
     </ClInclude>
     <ClInclude Include="..\includes\OverlappedEx.h">
       <Filter>Network\OverlappedEx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ChatServer.h">
+      <Filter>Services\ChatServer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\EchoServer.h">
+      <Filter>Services\EchoServer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\PacketBuffer.h">
+      <Filter>Network\Buffers\PacketBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\Server_Function.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\PacketManager.h">
+      <Filter>Managers\PacketManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\UserManager.h">
+      <Filter>Managers\UserManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
