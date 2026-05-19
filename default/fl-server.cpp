@@ -1,18 +1,18 @@
 ﻿#include "pch.h"
 
-#include "EchoServer.h"
+#include "ChatServer.h"
 
 int main()
 {
-	EchoServer server;
+	ChatServer server;
 
 	server.Init(MAX_IO_WORKER_THREAD);
 
 	server.BindandListen(SERVER_PORT);
 
-	server.StartServer(MAX_CLIENT);
+	server.Run(MAX_CLIENT);
 
-	printf("");
+	printf("quit : enter 'quit'");
 	while (true)
 	{
 		string inputCmd;

@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\ChatServer.cpp" />
     <ClCompile Include="..\src\ClientInfo.cpp" />
     <ClCompile Include="..\src\EchoServer.cpp" />
     <ClCompile Include="..\src\IOCPServer.cpp" />
@@ -157,6 +158,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\includes\ChatServer.h" />
     <ClInclude Include="..\includes\ClientInfo.h" />
     <ClInclude Include="..\includes\DomainState.h" />
     <ClInclude Include="..\includes\EchoServer.h" />

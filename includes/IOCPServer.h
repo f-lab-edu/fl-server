@@ -45,7 +45,7 @@ private:
 
 	void SendThread();
 
-	void CloseSocket(shared_ptr<stClientInfo> pClientInfo, bool bIsForce = false);
+	void CloseSocket(stClientInfo* pClientInfo, bool bIsForce = false);
 	
 
 private:

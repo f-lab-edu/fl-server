@@ -194,7 +194,7 @@ void IOCPServer::CreateSendThread()
 
 void IOCPServer::WorkerThread()
 {
-	shared_ptr<stClientInfo> pClientInfo = nullptr;
+	stClientInfo* pClientInfo = nullptr;
 	BOOL bSuccess = TRUE;
 	DWORD dwIoSize = { 0 };
 	LPOVERLAPPED lpOverlapped = NULL;
@@ -222,15 +222,18 @@ void IOCPServer::WorkerThread()
 
 		if (bSuccess == FALSE || (dwIoSize == 0 && pOverlappedEx->m_eOperation != IOOperation::ACCEPT))
 		{
-			printf("socket(%d) connection lost\n", (int)pClientInfo->GetSock());
-			CloseSocket(pClientInfo);
+			if (pClientInfo != nullptr)
+			{
+				printf("socket(%d) connection lost\n", (int)pClientInfo->GetSock());
+				CloseSocket(pClientInfo);
+			}
 			continue;
 		}
 
 
 		if (pOverlappedEx->m_eOperation == IOOperation::ACCEPT)
 		{
-			pClientInfo = GetClientInfo(pOverlappedEx->SessionIndex);
+			pClientInfo = GetClientInfo(pOverlappedEx->SessionIndex).get();
 			if (pClientInfo->AcceptCompletion())
 			{
 				++mClientCnt;
@@ -302,7 +305,7 @@ void IOCPServer::SendThread()
 	}
 }
 
-void IOCPServer::CloseSocket(shared_ptr<stClientInfo> pClientInfo, bool bIsForce)
+void IOCPServer::CloseSocket(stClientInfo* pClientInfo, bool bIsForce)
 {
 	if (pClientInfo->IsConnected() == false)
 		return;
