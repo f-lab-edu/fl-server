@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PacketInfo.h"
+
 class UserManager;
 class RoomManager;
 class RedisManager;
@@ -40,12 +42,14 @@ private:
 	void ProcessUserDisConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 
 	void ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+	void ProcessLoginDBResult(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 
 private:
 	using PROCESS_RECV_PACKET_FUNCTION = void(PacketManager::*)(UINT32, UINT16, shared_ptr<char[]>);
 	unordered_map<int, PROCESS_RECV_PACKET_FUNCTION> mRecvFunctionDictionary;
 
 	shared_ptr<UserManager> mUserManager;
+	shared_ptr<RedisManager> mRedisManager;
 
 	function<void(int, shared_ptr<char>)> mSendMQDataFunc;
 

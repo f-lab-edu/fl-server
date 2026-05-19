@@ -19,9 +19,6 @@
     <Filter Include="Services">
       <UniqueIdentifier>{c7c68807-8c61-4c53-b9e5-b1ffa9871ab3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Default\Enums">
-      <UniqueIdentifier>{5a26339f-15ab-4733-bf72-063fd8cf8fb2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Models\Packet">
       <UniqueIdentifier>{9e54d96e-0c1b-4577-a5be-6abca0627485}</UniqueIdentifier>
     </Filter>
@@ -61,6 +58,18 @@
     <Filter Include="Managers\UserManager">
       <UniqueIdentifier>{0d48b6d7-fc05-4227-991d-a69fa6f1b6af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DatabaseModels">
+      <UniqueIdentifier>{be608bdd-36ee-4dfc-9280-0f15bf9c7160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Enums">
+      <UniqueIdentifier>{5a26339f-15ab-4733-bf72-063fd8cf8fb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Redis">
+      <UniqueIdentifier>{8f63a285-0b6c-4236-92e9-ae05c1b03b50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\RedisManager">
+      <UniqueIdentifier>{8c6772d7-bcb2-4280-9b7a-f1d1298533a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -96,6 +105,12 @@
     <ClCompile Include="..\src\UserManager.cpp">
       <Filter>Managers\UserManager</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\RedisManager.cpp">
+      <Filter>Managers\RedisManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\CRedisConn.cpp">
+      <Filter>Default</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -105,10 +120,10 @@
       <Filter>Default</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\Enums.h">
-      <Filter>Default\Enums</Filter>
+      <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\IOOperation.h">
-      <Filter>Default\Enums</Filter>
+      <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\Server_Defines.h">
       <Filter>Default</Filter>
@@ -117,7 +132,7 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ErrorCode.h">
-      <Filter>Default\Enums</Filter>
+      <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\PacketInfo.h">
       <Filter>Models\Packet</Filter>
@@ -132,7 +147,7 @@
       <Filter>Models\Packet\Login</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\PacketId.h">
-      <Filter>Default\Enums</Filter>
+      <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RoomPacket.h">
       <Filter>Models\Packet\Room</Filter>
@@ -144,7 +159,7 @@
       <Filter>Models\User</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\DomainState.h">
-      <Filter>Default\Enums</Filter>
+      <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ClientInfo.h">
       <Filter>Network\ClientInfo</Filter>
@@ -169,6 +184,18 @@
     </ClInclude>
     <ClInclude Include="..\includes\UserManager.h">
       <Filter>Managers\UserManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\RedisTask.h">
+      <Filter>Models\Redis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\RedisTaskID.h">
+      <Filter>Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\RedisLogin.h">
+      <Filter>Models\Redis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\RedisManager.h">
+      <Filter>Managers\RedisManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

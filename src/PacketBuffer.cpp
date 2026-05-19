@@ -1,6 +1,8 @@
 #include "pch.h"
 
 #include "PacketBuffer.h"
+#include "PacketInfo.h"
+#include "PacketHeader.h"
 
 void PacketBuffer::Init(UINT32 bufferSize_)
 {

@@ -6,7 +6,19 @@
 #pragma comment(lib, "mswsock.lib")
 #include <mswsock.h>
 
+#pragma region thirdparty
+
+// git clone https://github.com/microsoft/vcpkg.git
+// cd vcpkg
+// C:\vcpkg\bootstrap-vcpkg.bat
+// C:\vcpkg\vcpkg integrate install
+
+// C:\vcpkg\vcpkg install spdlog:x64-windows
 #include "spdlog/spdlog.h"
+// C:\vcpkg\vcpkg install hiredis:x64-windows
+#include <hiredis/hiredis.h>
+
+#pragma endregion
 
 #include <string>
 #include <span>

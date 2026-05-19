@@ -1,7 +1,10 @@
 #pragma once
 
 #include "Packet.h"
+#include "PacketBuffer.h"
 #include "DomainState.h"
+
+struct PacketBuffer;
 
 class User
 {

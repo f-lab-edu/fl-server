@@ -4,20 +4,30 @@
 #include "UserManager.h"
 #include "User.h"
 
+#include "RedisManager.h"
+#include "RedisLogin.h"
+#include "RedisTask.h"
+
 void PacketManager::Init(const UINT32 maxClient_)
 {
 	mRecvFunctionDictionary = unordered_map<int, PROCESS_RECV_PACKET_FUNCTION>();
 
-	mRecvFunctionDictionary[(int)PACKET_ID::SYS_USER_CONNECT] = &PacketManager::ProcessUserConnect;
-	mRecvFunctionDictionary[(int)PACKET_ID::SYS_USER_DISCONNECT] = &PacketManager::ProcessUserDisConnect;
+	mRecvFunctionDictionary[PACKET_ID::SYS_USER_CONNECT] = &PacketManager::ProcessUserConnect;
+	mRecvFunctionDictionary[PACKET_ID::SYS_USER_DISCONNECT] = &PacketManager::ProcessUserDisConnect;
 
-	mRecvFunctionDictionary[(int)PACKET_ID::LOGIN_REQUEST] = &PacketManager::ProcessLogin;
+	mRecvFunctionDictionary[PACKET_ID::LOGIN_REQUEST] = &PacketManager::ProcessLogin;
+	mRecvFunctionDictionary[RedisTaskID::RESPONSE_LOGIN] = &PacketManager::ProcessLoginDBResult;
 
 	CreateComponent(maxClient_);
+
+	mRedisManager = make_shared<RedisManager>();
 }
 
 bool PacketManager::Run()
 {
+	if (mRedisManager->Run("127.0.0.1", 6379, 1) == false)
+		return false;
+
 	mIsRunProcessThread = true;
 	mProcessThread = thread([this]() { ProcessPacket(); });
 
@@ -26,6 +36,8 @@ bool PacketManager::Run()
 
 void PacketManager::End()
 {
+	mRedisManager->End();
+
 	mIsRunProcessThread = false;
 
 	if (mProcessThread.joinable())
@@ -116,6 +128,15 @@ void PacketManager::ProcessPacket()
 			ProcessRecvPacket(packetData.ClientIndex, packetData.PacketId, packetData.DataSize, packetData.pDataPtr);
 		}
 
+		if (auto task = mRedisManager->TakeResponseTask(); task.TaskID != RedisTaskID::INVALID)
+		{
+			isIdle = false;
+
+			shared_ptr<char[]> dataPtr(task.pData, static_cast<char*>(task.pData.get()));
+			ProcessRecvPacket(task.UserIndex, task.TaskID, task.DataSize, dataPtr);
+			task.Release();
+		}
+
 		if (isIdle)
 		{
 			this_thread::sleep_for(chrono::milliseconds(1));
@@ -165,8 +186,16 @@ void PacketManager::ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared
 
 	if (mUserManager->FindUserIndexByID(pLoginReqPacket->UserID) == -1)
 	{
-		loginResPacket.Result = (UINT16)ERROR_CODE::NONE;
-		SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
+		RedisLoginReq dbReq = {};
+		CopyMemory(dbReq.UserID, pLoginReqPacket->UserID, (MAX_USER_ID_LEN) + 1);
+		CopyMemory(dbReq.UserPW, pLoginReqPacket->UserPW, (MAX_USER_PW_LEN) + 1);
+
+		RedisTask task = {};
+		task.UserIndex = clientIndex_;
+		task.TaskID = RedisTaskID::REQUEST_LOGIN;
+		task.DataSize = sizeof(RedisLoginReq);
+		task.pData = make_shared<RedisLoginReq>(dbReq);
+		mRedisManager->PushTask(task);
 	}
 	else
 	{
@@ -174,4 +203,22 @@ void PacketManager::ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared
 		SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
 		return;
 	}
+}
+
+void PacketManager::ProcessLoginDBResult(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
+{
+	spdlog::info("ProcessLoginDBResult. UserIndex: {}", clientIndex_);
+
+	auto pBody = reinterpret_cast<RedisLoginRes*>(pPacket_.get());
+
+	if (pBody->Result == ERROR_CODE::NONE)
+	{
+		// 로그인 완료 처리
+	}
+
+	LOGIN_RESPONSE_PACKET loginResPacket = {};
+	loginResPacket.PacketId = PACKET_ID::LOGIN_RESPONSE;
+	loginResPacket.PacketLength = sizeof(LOGIN_RESPONSE_PACKET);
+	loginResPacket.Result = pBody->Result;
+	SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
 }

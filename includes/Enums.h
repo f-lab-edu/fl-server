@@ -4,3 +4,4 @@
 #include "ErrorCode.h"
 #include "PacketId.h"
 #include "DomainState.h"
+#include "RedisTaskID.h"
