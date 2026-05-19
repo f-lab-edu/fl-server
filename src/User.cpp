@@ -32,7 +32,7 @@ void User::EnterRoom(INT32 roomIndex_)
 	mCurDomainState = DOMAIN_STATE::ROOM;
 }
 
-void User::SetPacketData(const UINT32 dataSize_, shared_ptr<char> pData_)
+void User::SetPacketData(const UINT32 dataSize_, shared_ptr<char[]> pData_)
 {
 	mPacketBuffer.SetPacketData(dataSize_, pData_);
 }

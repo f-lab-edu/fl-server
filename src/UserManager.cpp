@@ -25,9 +25,9 @@ ERROR_CODE::Enum UserManager::AddUser(shared_ptr<char> userID_, int clientIndex_
 	return ERROR_CODE::NONE;
 }
 
-INT32 UserManager::FindUserIndexByID(shared_ptr<char> userID_)
+INT32 UserManager::FindUserIndexByID(const char* userID_)
 {
-	if (auto res = mUserIDDictionary.find(userID_.get()); res != mUserIDDictionary.end())
+	if (auto res = mUserIDDictionary.find(userID_); res != mUserIDDictionary.end())
 	{
 		return res->second;
 	}

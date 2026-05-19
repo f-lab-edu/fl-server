@@ -3,6 +3,7 @@
 #include "PacketHeader.h"
 #include "Define.h"
 
+#pragma pack(push,1)
 struct LOGIN_REQUEST_PACKET : public PACKET_HEADER
 {
 	char UserID[MAX_USER_ID_LEN + 1] = {};
@@ -15,3 +16,4 @@ struct LOGIN_RESPONSE_PACKET : public PACKET_HEADER
 {
 	UINT16 Result = { 0 };
 };
+#pragma pack(pop)

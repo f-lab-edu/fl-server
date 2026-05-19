@@ -20,7 +20,7 @@ public:
 
 	ERROR_CODE::Enum AddUser(shared_ptr<char> userID_, int clientIndex_);
 
-	INT32 FindUserIndexByID(shared_ptr<char> userID_);
+	INT32 FindUserIndexByID(const char* userID_);
 
 	void DeleteUserInfo(shared_ptr<User> user_);
 

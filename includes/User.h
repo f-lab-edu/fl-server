@@ -24,7 +24,7 @@ public:
 	string GetUserId() const { return mUserID; }
 	DOMAIN_STATE::Enum GetDomainState() { return mCurDomainState; }
 
-	void SetPacketData(const UINT32 dataSize_, shared_ptr<char> pData_);
+	void SetPacketData(const UINT32 dataSize_, shared_ptr<char[]> pData_);
 	PacketInfo GetPacket();
 
 private:

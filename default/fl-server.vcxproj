@@ -175,6 +175,7 @@
     <ClInclude Include="..\includes\RoomChatPacket.h" />
     <ClInclude Include="..\includes\RoomPacket.h" />
     <ClInclude Include="..\includes\Server_Defines.h" />
+    <ClInclude Include="..\includes\Server_Function.h" />
     <ClInclude Include="..\includes\User.h" />
     <ClInclude Include="..\includes\UserManager.h" />
     <ClInclude Include="Define.h" />
