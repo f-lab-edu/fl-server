@@ -61,7 +61,7 @@ void stClientInfo::Clear()
 
 bool stClientInfo::PostAccept(SOCKET listenSock_, const UINT64 curTimeSec_)
 {
-	printf_s("PostAccept. client Index: %d\n", GetIndex());
+	spdlog::info("PostAccept. client Index: {}\n", GetIndex());
 
 	mLastestClosedTimeSec = UINT32_MAX;
 
@@ -69,7 +69,7 @@ bool stClientInfo::PostAccept(SOCKET listenSock_, const UINT64 curTimeSec_)
 		NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (mSocket == INVALID_SOCKET)
 	{
-		printf_s("[ERROR] client Socket WSASocket : %d\n", GetLastError());
+		spdlog::error("[ERROR] client Socket WSASocket : {}\n", GetLastError());
 		return false;
 	}
 
@@ -87,17 +87,17 @@ bool stClientInfo::PostAccept(SOCKET listenSock_, const UINT64 curTimeSec_)
 	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
-			printf_s("AcceptEx Error : %d\n", GetLastError());
+			spdlog::error("AcceptEx Error : {}\n", WSAGetLastError());
 			return false;
 		}
 	}
 
-	return false;
+	return true;
 }
 
 bool stClientInfo::AcceptCompletion()
 {
-	printf_s("AcceptCompletion : SessionIndex(%d)\n", mIndex);
+	spdlog::info("AcceptCompletion : SessionIndex({})\n", mIndex);
 
 	if (OnConnect(mIOCPHandle, mSocket) == false)
 		return false;
@@ -106,7 +106,7 @@ bool stClientInfo::AcceptCompletion()
 	int nAddrLen = sizeof(SOCKADDR_IN);
 	char clientIP[32] = { 0, };
 	inet_ntop(AF_INET, &(stClientAddr.sin_addr), clientIP, 32 - 1);
-	printf("Client Connect : IP(%s) SOCKET(%d)\n", clientIP, (int)mSocket);
+	spdlog::info("Client Connect : IP({}) SOCKET({})\n", clientIP, (int)mSocket);
 
 	return false;
 }
@@ -120,7 +120,7 @@ bool stClientInfo::BindIOCompletionPort(HANDLE iocpHandle_)
 
 	if (hIOCP == INVALID_HANDLE_VALUE)
 	{
-		printf("[ERROR] CreateIoCompletionPort() failed: %d", GetLastError());
+		spdlog::error("[ERROR] CreateIoCompletionPort() failed: {}", GetLastError());
 		return false;
 	}
 
@@ -146,7 +146,7 @@ bool stClientInfo::BindRecv()
 
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		printf("[ERROR] WSARecv() failed : %d\n", WSAGetLastError());
+		spdlog::error("[ERROR] WSARecv() failed : {}\n", WSAGetLastError());
 		return false;
 	}
 
@@ -194,7 +194,7 @@ bool stClientInfo::SendIO()
 
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		printf("[ERROR] WSASend() failed : %d\n", WSAGetLastError());
+		spdlog::error("[ERROR] WSASend() failed : {}\n", WSAGetLastError());
 		return false;
 	}
 
@@ -205,7 +205,7 @@ bool stClientInfo::SendIO()
 void stClientInfo::SendCompleted(const UINT32 dataSize_)
 {
 	mIsSending = false;
-	printf("[Send Completed] bytes : %d\n", dataSize_);
+	spdlog::info("[Send Completed] bytes : {}\n", dataSize_);
 }
 
 bool stClientInfo::SetSocketOption()
@@ -214,7 +214,7 @@ bool stClientInfo::SetSocketOption()
 	if (SOCKET_ERROR == setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&opt, sizeof(int)))
 	{
 #ifdef _DEBUG
-		printf_s("[DEBUF] TCP_NODELAY error : %d\n", GetLastError());
+		spdlog::debug("[DEBUF] TCP_NODELAY error : {}\n", GetLastError());
 #endif // DEBUG
 		return false;
 	}
@@ -223,7 +223,7 @@ bool stClientInfo::SetSocketOption()
 	if (SOCKET_ERROR == setsockopt(mSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&opt, sizeof(int)))
 	{
 #ifdef _DEBUG
-		printf_s("[DEBUG] SO_RCVBUF change error : %d\n", GetLastError());
+		spdlog::debug("[DEBUG] SO_RCVBUF change error : {}\n", GetLastError());
 #endif // _DEBUG
 		return false;
 	}

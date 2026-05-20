@@ -28,7 +28,7 @@ void ChatServer::End()
 
 void ChatServer::OnConnect(const UINT32 clientIndex_)
 {
-	printf("[OnConnect] client : index(%d)\n", clientIndex_);
+	spdlog::info("[OnConnect] client : index({})\n", clientIndex_);
 
 	PacketInfo packet{ clientIndex_, PACKET_ID::SYS_USER_CONNECT, 0 };
 	m_pPacketManager->PushSystemPacket(packet);
@@ -36,7 +36,7 @@ void ChatServer::OnConnect(const UINT32 clientIndex_)
 
 void ChatServer::OnClose(const UINT32 clientIndex_)
 {
-	printf("[OnClose] client : index(%d)\n", clientIndex_);
+	spdlog::info("[OnClose] client : index({})\n", clientIndex_);
 
 	PacketInfo packet{ clientIndex_, PACKET_ID::SYS_USER_DISCONNECT, 0 };
 	m_pPacketManager->PushSystemPacket(packet);
@@ -44,7 +44,7 @@ void ChatServer::OnClose(const UINT32 clientIndex_)
 
 void ChatServer::OnReceive(const UINT32 clientIndex_, const UINT32 size_, shared_ptr<char[]> pData_)
 {
-	printf("[OnReceive] client : index (%d), dataSize(%d)\n", clientIndex_, size_);
+	spdlog::info("[OnReceive] client : index ({}), dataSize({})\n", clientIndex_, size_);
 
 	m_pPacketManager->ReceivePacketData(clientIndex_, size_, pData_);
 }

@@ -179,14 +179,14 @@ void PacketManager::ProcessRecvPacket(const UINT32 clientIndex_, const UINT16 pa
 
 void PacketManager::ProcessUserConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
 {
-	printf("[ProcessUserConnect] clientIndex : %d\n", clientIndex_);
+	spdlog::info("[ProcessUserConnect] clientIndex : {}\n", clientIndex_);
 	auto pUser = mUserManager->GetUserByConnIdx(clientIndex_);
 	pUser->Clear();
 }
 
 void PacketManager::ProcessUserDisConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
 {
-	printf("[ProcessUserDisConnect] clientIndex : %d\n", clientIndex_);
+	spdlog::info("[ProcessUserDisConnect] clientIndex : {}\n", clientIndex_);
 	ClearConnectionInfo(clientIndex_);
 }
 
@@ -197,7 +197,7 @@ void PacketManager::ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared
 
 	auto pLoginReqPacket = reinterpret_cast<LOGIN_REQUEST_PACKET*>(pPacket_.get());
 
-	printf("requested user id = %s\n", pLoginReqPacket->UserID);
+	spdlog::info("requested user id = {}\n", pLoginReqPacket->UserID);
 
 	LOGIN_RESPONSE_PACKET loginResPacket = {};
 	loginResPacket.PacketId = (UINT16)PACKET_ID::LOGIN_RESPONSE;

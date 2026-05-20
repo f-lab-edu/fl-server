@@ -18,7 +18,7 @@ bool IOCPServer::Init(const UINT32 maxIOWorkerThreadCount_)
 	int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (nRet != 0)
 	{
-		printf("[ERROR] WSAStartup() failed : %d\n", WSAGetLastError());
+		spdlog::error("[ERROR] WSAStartup() failed : {}\n", WSAGetLastError());
 		return false;
 	}
 
@@ -27,13 +27,13 @@ bool IOCPServer::Init(const UINT32 maxIOWorkerThreadCount_)
 
 	if (mListenSocket == INVALID_SOCKET)
 	{
-		printf("[ERROR] socket() failed : %d\n", WSAGetLastError());
+		spdlog::error("[ERROR] socket() failed : {}\n", WSAGetLastError());
 		return false;
 	}
 
 	MaxIOWorkerThreadCount = maxIOWorkerThreadCount_;
 
-	printf("init complete\n");
+	spdlog::info("init complete\n");
 	return true;
 }
 
@@ -47,32 +47,32 @@ bool IOCPServer::BindandListen(int nBindPort)
 	int nRet = ::bind(mListenSocket, (SOCKADDR*)&stServerAddr, sizeof(SOCKADDR_IN));
 	if (nRet != 0)
 	{
-		printf("[ERROR] bind() failed : %d\n", WSAGetLastError());
+		spdlog::error("[ERROR] bind() failed : %d\n", WSAGetLastError());
 		return false;
 	}
 
 	nRet = listen(mListenSocket, 5);
 	if (nRet != 0)
 	{
-		printf("[ERROR] listen() failed : %d\n", WSAGetLastError());
+		spdlog::error("[ERROR] listen() failed : %d\n", WSAGetLastError());
 		return false;
 	}
 
 	mIOCPHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, MaxIOWorkerThreadCount);
 	if (mIOCPHandle == NULL)
 	{
-		printf("[ERROR] CreateIoCompletionPort() failed: %d", GetLastError());
+		spdlog::error("[ERROR] CreateIoCompletionPort() failed: %d\n", GetLastError());
 		return false;
 	}
 
 	auto hIOCPHandle = CreateIoCompletionPort((HANDLE)mListenSocket, mIOCPHandle, (UINT32)0, 0);
 	if (hIOCPHandle == nullptr)
 	{
-		printf("[ERROR] failed bind listen socket IOCP : %d", WSAGetLastError());
+		spdlog::error("[ERROR] failed bind listen socket IOCP : %d\n", WSAGetLastError());
 		return false;
 	}
 
-	printf("server register complete\n");
+	spdlog::info("server register complete\n");
 	return true;
 }
 
@@ -94,7 +94,7 @@ bool IOCPServer::StartServer(const UINT32 maxClientCount)
 
 	CreateSendThread();
 
-	printf("server start\n");
+	spdlog::info("server start\n");
 	return true;
 }
 
@@ -172,7 +172,7 @@ bool IOCPServer::CreateWorkerThread()
 		mIOWorkerThreads.emplace_back([this]() { WorkerThread(); });
 	}
 
-	printf("WorkerThread start\n");
+	spdlog::info("WorkerThread start\n");
 	return true;
 }
 
@@ -181,7 +181,7 @@ bool IOCPServer::CreateAccepterThread()
 	mIsAccepterRun = true;
 	mAccepterThread = thread([this]() { AccepterThread(); });
 
-	printf("AccepterThread start");
+	spdlog::info("AccepterThread start\n");
 	return true;
 }
 
@@ -189,7 +189,7 @@ void IOCPServer::CreateSendThread()
 {
 	mIsSenderRun = true;
 	mSendThread = thread([this]() { SendThread(); });
-	printf("SenderThread start");
+	spdlog::info("SenderThread start\n");
 }
 
 void IOCPServer::WorkerThread()
@@ -224,7 +224,7 @@ void IOCPServer::WorkerThread()
 		{
 			if (pClientInfo != nullptr)
 			{
-				printf("socket(%d) connection lost\n", (int)pClientInfo->GetSock());
+				spdlog::info("socket({}) connection lost\n", (int)pClientInfo->GetSock());
 				CloseSocket(pClientInfo);
 			}
 			continue;
@@ -249,7 +249,7 @@ void IOCPServer::WorkerThread()
 		{
 			OnReceive(pClientInfo->GetIndex(), dwIoSize, pClientInfo->RecvBuffer());
 
-			printf("[RECEIVED] bytes : %d , msg : %s\n", dwIoSize, pClientInfo->RecvBuffer().get());
+			spdlog::info("[RECEIVED] bytes : {} , msg : {}\n", dwIoSize, pClientInfo->RecvBuffer().get());
 
 			pClientInfo->BindRecv();
 		}
@@ -259,7 +259,7 @@ void IOCPServer::WorkerThread()
 		}
 		else
 		{
-			printf("[EXCEPTION] socket(%d)\n", pClientInfo->GetIndex());
+			spdlog::warn("[EXCEPTION] socket({})\n", pClientInfo->GetIndex());
 		}
 	}
 }
