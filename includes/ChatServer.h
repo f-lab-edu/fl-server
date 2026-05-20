@@ -1,15 +1,13 @@
 #pragma once
 
-#include "IOCPServer.h"
 #include "PacketManager.h"
-
-class PacketManager;
+#include "IOCPServer.h"
 
 class ChatServer : public IOCPServer
 {
 public:
 	ChatServer() = default;
-	~ChatServer() = default;
+	~ChatServer();
 
 	void Run(const UINT32 maxClient);
 

@@ -1,20 +1,20 @@
 #pragma once
 
-#include "CRedisConn.h"
-
 #include "RedisTask.h"
 
 // docker pull redis:8.8-m03-alpine3.23
 // port 6379
 // volume redis-data:/data
 
+namespace RedisCpp { class CRedisConn; }
+
 struct RedisTask;
 
 class RedisManager
 {
 public:
-	RedisManager() = default;
-	~RedisManager() = default;
+	RedisManager();
+	~RedisManager();
 
 	bool Run(string ip_, UINT16 port_, const UINT32 threadCount_);
 
@@ -34,7 +34,7 @@ private:
 	void PushResponse(RedisTask task_);
 
 private:
-	RedisCpp::CRedisConn mConn;
+	unique_ptr<RedisCpp::CRedisConn> mConn;
 
 	atomic<bool> mIsTaskRun = false;
 	vector<thread> mTaskThreads;

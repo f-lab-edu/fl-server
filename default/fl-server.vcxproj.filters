@@ -10,29 +10,11 @@
     <Filter Include="Managers">
       <UniqueIdentifier>{3d008573-e7e6-48c6-8e24-0248b5c1003d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Models">
-      <UniqueIdentifier>{58e2e790-3ea9-49f4-99bb-dc595efa974f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Network">
       <UniqueIdentifier>{8372c802-7747-4f06-b97f-c8669d7a0c86}</UniqueIdentifier>
     </Filter>
     <Filter Include="Services">
       <UniqueIdentifier>{c7c68807-8c61-4c53-b9e5-b1ffa9871ab3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Packet">
-      <UniqueIdentifier>{9e54d96e-0c1b-4577-a5be-6abca0627485}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Packet\Login">
-      <UniqueIdentifier>{4f4d1eda-2821-401f-83f1-4b126122e4cf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Packet\Room">
-      <UniqueIdentifier>{d639d05c-8a94-4b3f-8a58-47fec32f1835}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Packet\RoomChat">
-      <UniqueIdentifier>{3e5eb574-e15b-478e-bee1-8498943ea453}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\User">
-      <UniqueIdentifier>{197a744b-853c-4af3-9adf-e19a4f6d0a53}</UniqueIdentifier>
     </Filter>
     <Filter Include="Network\ClientInfo">
       <UniqueIdentifier>{8563a05d-7b67-49a5-9dac-6df848f3d412}</UniqueIdentifier>
@@ -64,11 +46,35 @@
     <Filter Include="Enums">
       <UniqueIdentifier>{5a26339f-15ab-4733-bf72-063fd8cf8fb2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Models\Redis">
-      <UniqueIdentifier>{8f63a285-0b6c-4236-92e9-ae05c1b03b50}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Managers\RedisManager">
       <UniqueIdentifier>{8c6772d7-bcb2-4280-9b7a-f1d1298533a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\RoomManager">
+      <UniqueIdentifier>{03cb6b38-e24f-4c0c-8c45-25a0b9d00565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels">
+      <UniqueIdentifier>{58e2e790-3ea9-49f4-99bb-dc595efa974f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Packet">
+      <UniqueIdentifier>{9e54d96e-0c1b-4577-a5be-6abca0627485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Packet\Login">
+      <UniqueIdentifier>{4f4d1eda-2821-401f-83f1-4b126122e4cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Packet\Room">
+      <UniqueIdentifier>{d639d05c-8a94-4b3f-8a58-47fec32f1835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Packet\RoomChat">
+      <UniqueIdentifier>{3e5eb574-e15b-478e-bee1-8498943ea453}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\User">
+      <UniqueIdentifier>{197a744b-853c-4af3-9adf-e19a4f6d0a53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Redis">
+      <UniqueIdentifier>{8f63a285-0b6c-4236-92e9-ae05c1b03b50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Room">
+      <UniqueIdentifier>{b5b0d542-9d55-422a-adb3-d22e67878002}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -82,10 +88,10 @@
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Packet.cpp">
-      <Filter>Models\Packet</Filter>
+      <Filter>ObjectModels\Packet</Filter>
     </ClCompile>
     <ClCompile Include="..\src\User.cpp">
-      <Filter>Models\User</Filter>
+      <Filter>ObjectModels\User</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ClientInfo.cpp">
       <Filter>Network\ClientInfo</Filter>
@@ -111,6 +117,12 @@
     <ClCompile Include="..\thirdparty\CRedisConn.cpp">
       <Filter>Default</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Room.cpp">
+      <Filter>ObjectModels\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\RoomManager.cpp">
+      <Filter>Managers\RoomManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -135,28 +147,28 @@
       <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\PacketInfo.h">
-      <Filter>Models\Packet</Filter>
+      <Filter>ObjectModels\Packet</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\Packet.h">
-      <Filter>Models\Packet</Filter>
+      <Filter>ObjectModels\Packet</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\PacketHeader.h">
-      <Filter>Models\Packet</Filter>
+      <Filter>ObjectModels\Packet</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\LoginPacket.h">
-      <Filter>Models\Packet\Login</Filter>
+      <Filter>ObjectModels\Packet\Login</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\PacketId.h">
       <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RoomPacket.h">
-      <Filter>Models\Packet\Room</Filter>
+      <Filter>ObjectModels\Packet\Room</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RoomChatPacket.h">
-      <Filter>Models\Packet\RoomChat</Filter>
+      <Filter>ObjectModels\Packet\RoomChat</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\User.h">
-      <Filter>Models\User</Filter>
+      <Filter>ObjectModels\User</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\DomainState.h">
       <Filter>Enums</Filter>
@@ -186,16 +198,22 @@
       <Filter>Managers\UserManager</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RedisTask.h">
-      <Filter>Models\Redis</Filter>
+      <Filter>ObjectModels\Redis</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RedisTaskID.h">
       <Filter>Enums</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RedisLogin.h">
-      <Filter>Models\Redis</Filter>
+      <Filter>ObjectModels\Redis</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RedisManager.h">
       <Filter>Managers\RedisManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\Room.h">
+      <Filter>ObjectModels\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\RoomManager.h">
+      <Filter>Managers\RoomManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

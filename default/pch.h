@@ -15,8 +15,9 @@
 
 // C:\vcpkg\vcpkg install spdlog:x64-windows
 #include "spdlog/spdlog.h"
+
 // C:\vcpkg\vcpkg install hiredis:x64-windows
-#include <hiredis/hiredis.h>
+//#include <hiredis/hiredis.h>
 
 #pragma endregion
 
