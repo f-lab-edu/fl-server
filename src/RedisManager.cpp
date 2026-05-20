@@ -1,11 +1,17 @@
 #include "pch.h"
 
+#include "CRedisConn.h"
 
 #include "RedisManager.h"
 #include "RedisLogin.h"
 
+RedisManager::RedisManager() = default;
+
+RedisManager::~RedisManager() = default;
+
 bool RedisManager::Run(string ip_, UINT16 port_, const UINT32 threadCount_)
 {
+	mConn = make_unique<RedisCpp::CRedisConn>();
 	if (Connect(ip_, port_) == false)
 	{
 		spdlog::error("Redis connect failed\n");
@@ -54,9 +60,9 @@ RedisTask RedisManager::TakeResponseTask()
 
 bool RedisManager::Connect(string ip_, UINT16 port_)
 {
-	if (mConn.connect(ip_, port_) == false)
+	if (mConn->connect(ip_, port_) == false)
 	{
-		spdlog::error("redis connect error : {}\n", mConn.getErrorStr());
+		spdlog::error("redis connect error : {}\n", mConn->getErrorStr());
 		return false;
 	}
 	else
@@ -86,7 +92,7 @@ void RedisManager::TaskProcessThread()
 				bodyData.Result = ERROR_CODE::LOGIN_USER_INVALID_PW;
 
 				string value;
-				if (mConn.get(pRequest->UserID, value))
+				if (mConn->get(pRequest->UserID, value))
 				{
 					bodyData.Result = ERROR_CODE::NONE;
 

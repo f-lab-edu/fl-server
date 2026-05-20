@@ -9,8 +9,8 @@ class RedisManager;
 class PacketManager
 {
 public:
-	PacketManager() = default;
-	~PacketManager() = default;
+	PacketManager();
+	~PacketManager();
 
 	void Init(const UINT32 maxClient_);
 
@@ -44,12 +44,17 @@ private:
 	void ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 	void ProcessLoginDBResult(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 
+	void ProcessEnterRoom(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+	void ProcessLeaveRoom(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+	void ProcessRoomChatMessage(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+
 private:
 	using PROCESS_RECV_PACKET_FUNCTION = void(PacketManager::*)(UINT32, UINT16, shared_ptr<char[]>);
 	unordered_map<int, PROCESS_RECV_PACKET_FUNCTION> mRecvFunctionDictionary;
 
-	shared_ptr<UserManager> mUserManager;
-	shared_ptr<RedisManager> mRedisManager;
+	unique_ptr<UserManager> mUserManager;
+	unique_ptr<RoomManager> mRoomManager;
+	unique_ptr<RedisManager> mRedisManager;
 
 	function<void(int, shared_ptr<char>)> mSendMQDataFunc;
 

@@ -2,6 +2,8 @@
 
 #include "ChatServer.h"
 
+ChatServer::~ChatServer() = default;
+
 void ChatServer::Run(const UINT32 maxClient)
 {
 	auto sendPacketFunc = [&](UINT32 clientIndex_, UINT16 packetSize, shared_ptr<char[]> pSendPacket)
@@ -28,7 +30,7 @@ void ChatServer::OnConnect(const UINT32 clientIndex_)
 {
 	printf("[OnConnect] client : index(%d)\n", clientIndex_);
 
-	PacketInfo packet{ clientIndex_, (UINT16)PACKET_ID::SYS_USER_CONNECT, 0 };
+	PacketInfo packet{ clientIndex_, PACKET_ID::SYS_USER_CONNECT, 0 };
 	m_pPacketManager->PushSystemPacket(packet);
 }
 
@@ -36,7 +38,7 @@ void ChatServer::OnClose(const UINT32 clientIndex_)
 {
 	printf("[OnClose] client : index(%d)\n", clientIndex_);
 
-	PacketInfo packet{ clientIndex_, (UINT16)PACKET_ID::SYS_USER_DISCONNECT, 0 };
+	PacketInfo packet{ clientIndex_, PACKET_ID::SYS_USER_DISCONNECT, 0 };
 	m_pPacketManager->PushSystemPacket(packet);
 }
 
