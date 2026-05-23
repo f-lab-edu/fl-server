@@ -4,7 +4,6 @@
 
 class UserManager;
 class RoomManager;
-class RedisManager;
 
 class PacketManager
 {
@@ -54,7 +53,6 @@ private:
 
 	unique_ptr<UserManager> mUserManager;
 	unique_ptr<RoomManager> mRoomManager;
-	unique_ptr<RedisManager> mRedisManager;
 
 	function<void(int, shared_ptr<char>)> mSendMQDataFunc;
 
