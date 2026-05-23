@@ -108,7 +108,7 @@ bool stClientInfo::AcceptCompletion()
 	inet_ntop(AF_INET, &(stClientAddr.sin_addr), clientIP, 32 - 1);
 	spdlog::info("Client Connect : IP({}) SOCKET({})\n", clientIP, (int)mSocket);
 
-	return false;
+	return true;
 }
 
 bool stClientInfo::BindIOCompletionPort(HANDLE iocpHandle_)
