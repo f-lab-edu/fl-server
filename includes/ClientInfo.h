@@ -56,6 +56,7 @@ private:
 	UINT64 mLastestClosedTimeSec = 0;
 
 	SOCKET mSocket;
+	SOCKET mListenSocket = INVALID_SOCKET;
 
 	stOverlappedEx mAcceptContext;
 	char mAcceptBuf[64] = {};
@@ -66,7 +67,7 @@ private:
 	shared_ptr<char[]> mRecvBuf = {};
 
 	mutex mSendLock;
-	bool mIsSending = false;
+	atomic<bool> mIsSending = false;
 	UINT64 mSendPos = 0;
 	char mSendBuf[MAX_SOCK_SENDBUF];
 	char mSendingBuf[MAX_SOCK_SENDBUF];

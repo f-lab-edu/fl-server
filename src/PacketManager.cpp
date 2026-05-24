@@ -2,6 +2,8 @@
 
 #include "PacketManager.h"
 
+#include "Sys_ConnectResponsePacket.h"
+
 #include "UserManager.h"
 #include "User.h"
 
@@ -16,10 +18,13 @@ void PacketManager::Init(const UINT32 maxClient_)
 {
 	mRecvFunctionDictionary = unordered_map<int, PROCESS_RECV_PACKET_FUNCTION>();
 
+	mRecvFunctionDictionary[PACKET_ID::SYS_USER_CONNECT_RESPONSE] = &PacketManager::ProcessSysUserConnectResponse;
+
 	mRecvFunctionDictionary[PACKET_ID::SYS_USER_CONNECT] = &PacketManager::ProcessUserConnect;
 	mRecvFunctionDictionary[PACKET_ID::SYS_USER_DISCONNECT] = &PacketManager::ProcessUserDisConnect;
 
 	mRecvFunctionDictionary[PACKET_ID::LOGIN_REQUEST] = &PacketManager::ProcessLogin;
+	mRecvFunctionDictionary[PACKET_ID::LOGIN_RESPONSE] = &PacketManager::ProcessLogin;
 
 	mRecvFunctionDictionary[PACKET_ID::ROOM_ENTER_REQUEST] = &PacketManager::ProcessEnterRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_LEAVE_REQUEST] = &PacketManager::ProcessLeaveRoom;
@@ -156,6 +161,16 @@ void PacketManager::ProcessRecvPacket(const UINT32 clientIndex_, const UINT16 pa
 		(this->*(iter->second))(clientIndex_, packetSize_, pPacket_);
 }
 
+void PacketManager::ProcessSysUserConnectResponse(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
+{
+	SYS_CONNECT_RESPONSE_PACKET connectResPacket = {};
+	connectResPacket.PacketId = PACKET_ID::LOGIN_RESPONSE;
+	connectResPacket.PacketLength = sizeof(SYS_CONNECT_RESPONSE_PACKET);
+
+	connectResPacket.ClientId = clientIndex_;
+	SendPacketFunc(clientIndex_, sizeof(SYS_CONNECT_RESPONSE_PACKET), MakePacketBuffer(connectResPacket));
+}
+
 void PacketManager::ProcessUserConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
 {
 	spdlog::info("[ProcessUserConnect] clientIndex : {}\n", clientIndex_);
@@ -191,6 +206,11 @@ void PacketManager::ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared
 
 	if (mUserManager->FindUserIndexByID(pLoginReqPacket->UserID) == -1)
 	{
+		mUserManager->AddUser(make_shared<char>(*pLoginReqPacket->UserID), clientIndex_);
+
+		loginResPacket.Result = ERROR_CODE::NONE;
+		SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
+		return;
 	}
 	else
 	{

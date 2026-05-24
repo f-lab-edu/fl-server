@@ -32,6 +32,9 @@ void ChatServer::OnConnect(const UINT32 clientIndex_)
 
 	PacketInfo packet{ clientIndex_, PACKET_ID::SYS_USER_CONNECT, 0 };
 	m_pPacketManager->PushSystemPacket(packet);
+
+	packet = PacketInfo{ clientIndex_, PACKET_ID::SYS_USER_CONNECT_RESPONSE, 0 };
+	m_pPacketManager->PushSystemPacket(packet);
 }
 
 void ChatServer::OnClose(const UINT32 clientIndex_)

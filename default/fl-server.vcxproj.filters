@@ -70,6 +70,9 @@
     <Filter Include="ObjectModels\Room">
       <UniqueIdentifier>{b5b0d542-9d55-422a-adb3-d22e67878002}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ObjectModels\Packet\System">
+      <UniqueIdentifier>{1b29f083-7b28-47d0-bbe4-e80425df8479}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -190,6 +193,10 @@
     </ClInclude>
     <ClInclude Include="..\includes\PacketManager.h">
       <Filter>Managers\PacketManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\CharacterSyncPacket.h" />
+    <ClInclude Include="..\includes\Sys_ConnectResponsePacket.h">
+      <Filter>ObjectModels\Packet\System</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
