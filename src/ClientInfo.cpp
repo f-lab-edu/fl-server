@@ -5,6 +5,7 @@
 stClientInfo::stClientInfo()
 {
 	ZeroMemory(&mRecvOverlappedEx, sizeof(stOverlappedEx));
+	ZeroMemory(&mSendOverlappedEx, sizeof(stOverlappedEx));
 	mSocket = INVALID_SOCKET;
 	mRecvBuf = make_shared<char[]>(MAX_SOCKBUF);
 	ZeroMemory(mRecvBuf.get(), MAX_SOCKBUF);
@@ -63,6 +64,8 @@ bool stClientInfo::PostAccept(SOCKET listenSock_, const UINT64 curTimeSec_)
 {
 	spdlog::info("PostAccept. client Index: {}\n", GetIndex());
 
+	mListenSocket = listenSock_;
+
 	mLastestClosedTimeSec = UINT32_MAX;
 
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP,
@@ -99,6 +102,15 @@ bool stClientInfo::AcceptCompletion()
 {
 	spdlog::info("AcceptCompletion : SessionIndex({})\n", mIndex);
 
+	if (SOCKET_ERROR == setsockopt(mSocket, SOL_SOCKET,
+		SO_UPDATE_ACCEPT_CONTEXT,
+		(char*)&mListenSocket,
+		sizeof(SOCKET)))
+	{
+		spdlog::error("SO_UPDATE_ACCEPT_CONTEXT failed: {}", WSAGetLastError());
+		return false;
+	}
+
 	if (OnConnect(mIOCPHandle, mSocket) == false)
 		return false;
 
@@ -117,6 +129,8 @@ bool stClientInfo::BindIOCompletionPort(HANDLE iocpHandle_)
 		iocpHandle_,
 		(ULONG_PTR)(this),
 		0);
+
+	spdlog::info("BindIOCP result: {} socket: {}", (INT64)hIOCP, (int)GetSock());
 
 	if (hIOCP == INVALID_HANDLE_VALUE)
 	{
@@ -165,6 +179,9 @@ bool stClientInfo::SendMsg(const UINT32 dataSize_, shared_ptr<char[]> pMsg_)
 	CopyMemory(pSendBuf, pMsg_.get(), dataSize_);
 	mSendPos += dataSize_;
 
+	if (!mIsSending)
+		SendIO();
+
 	return true;
 }
 
@@ -173,7 +190,17 @@ bool stClientInfo::SendIO()
 	if (mSendPos <= 0 || mIsSending)
 		return true;
 
-	lock_guard<mutex> guard(mSendLock);
+	if (mSocket == INVALID_SOCKET)
+		return false;
+
+	spdlog::info("SendIO socket handle: {}", (int)mSocket);
+
+	int optVal = { 0 };
+	int optLen = sizeof(optVal);
+	int ret = getsockopt(mSocket, SOL_SOCKET, SO_TYPE, (char*)&optVal, &optLen);
+	spdlog::info("getsockopt SO_TYPE ret: {} optVal: {} err: {}", ret, optVal, WSAGetLastError());
+
+	ZeroMemory(&mSendOverlappedEx, sizeof(stOverlappedEx));
 
 	mIsSending = true;
 
