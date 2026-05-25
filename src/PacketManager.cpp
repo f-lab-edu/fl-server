@@ -164,7 +164,7 @@ void PacketManager::ProcessRecvPacket(const UINT32 clientIndex_, const UINT16 pa
 void PacketManager::ProcessSysUserConnectResponse(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
 {
 	SYS_CONNECT_RESPONSE_PACKET connectResPacket = {};
-	connectResPacket.PacketId = PACKET_ID::LOGIN_RESPONSE;
+	connectResPacket.PacketId = PACKET_ID::SYS_USER_CONNECT_RESPONSE;
 	connectResPacket.PacketLength = sizeof(SYS_CONNECT_RESPONSE_PACKET);
 
 	connectResPacket.ClientId = clientIndex_;
