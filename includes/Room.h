@@ -33,5 +33,7 @@ private:
 	list<shared_ptr<User>> mUserList;
 	INT32 mMaxUserCount = { 0 };
 	UINT16 mCurrentUserCount = { 0 };
+
+	mutex m_RoomLock;
 };
 
