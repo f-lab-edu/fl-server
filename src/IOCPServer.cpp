@@ -92,7 +92,7 @@ bool IOCPServer::StartServer(const UINT32 maxClientCount)
 		return false;
 	}
 
-	CreateSendThread();
+	//CreateSendThread();
 
 	spdlog::info("server start\n");
 	return true;
@@ -296,6 +296,9 @@ void IOCPServer::SendThread()
 		for (auto client : mClientInfos)
 		{
 			if (client->IsConnected() == false)
+				continue;
+
+			if (client->GetSock() == INVALID_SOCKET)
 				continue;
 
 			client->SendIO();

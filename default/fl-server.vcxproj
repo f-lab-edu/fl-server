@@ -153,14 +153,10 @@
     <ClCompile Include="..\src\Packet.cpp" />
     <ClCompile Include="..\src\PacketBuffer.cpp" />
     <ClCompile Include="..\src\PacketManager.cpp" />
-    <ClCompile Include="..\src\RedisManager.cpp" />
     <ClCompile Include="..\src\Room.cpp" />
     <ClCompile Include="..\src\RoomManager.cpp" />
     <ClCompile Include="..\src\User.cpp" />
     <ClCompile Include="..\src\UserManager.cpp" />
-    <ClCompile Include="..\thirdparty\CRedisConn.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="fl-server.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -168,6 +164,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\includes\CharacterSyncPacket.h" />
     <ClInclude Include="..\includes\ChatServer.h" />
     <ClInclude Include="..\includes\ClientInfo.h" />
     <ClInclude Include="..\includes\DomainState.h" />
@@ -184,16 +181,13 @@
     <ClInclude Include="..\includes\PacketId.h" />
     <ClInclude Include="..\includes\PacketInfo.h" />
     <ClInclude Include="..\includes\PacketManager.h" />
-    <ClInclude Include="..\includes\RedisLogin.h" />
-    <ClInclude Include="..\includes\RedisManager.h" />
-    <ClInclude Include="..\includes\RedisTask.h" />
-    <ClInclude Include="..\includes\RedisTaskID.h" />
     <ClInclude Include="..\includes\Room.h" />
     <ClInclude Include="..\includes\RoomChatPacket.h" />
     <ClInclude Include="..\includes\RoomManager.h" />
     <ClInclude Include="..\includes\RoomPacket.h" />
     <ClInclude Include="..\includes\Server_Defines.h" />
     <ClInclude Include="..\includes\Server_Function.h" />
+    <ClInclude Include="..\includes\Sys_ConnectResponsePacket.h" />
     <ClInclude Include="..\includes\User.h" />
     <ClInclude Include="..\includes\UserManager.h" />
     <ClInclude Include="Define.h" />

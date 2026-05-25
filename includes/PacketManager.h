@@ -4,7 +4,6 @@
 
 class UserManager;
 class RoomManager;
-class RedisManager;
 
 class PacketManager
 {
@@ -38,6 +37,8 @@ private:
 
 	void ProcessRecvPacket(const UINT32 clientIndex_, const UINT16 packetId_, const UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 
+	void ProcessSysUserConnectResponse(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+
 	void ProcessUserConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 	void ProcessUserDisConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 
@@ -54,7 +55,6 @@ private:
 
 	unique_ptr<UserManager> mUserManager;
 	unique_ptr<RoomManager> mRoomManager;
-	unique_ptr<RedisManager> mRedisManager;
 
 	function<void(int, shared_ptr<char>)> mSendMQDataFunc;
 

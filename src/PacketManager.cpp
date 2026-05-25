@@ -2,15 +2,13 @@
 
 #include "PacketManager.h"
 
+#include "Sys_ConnectResponsePacket.h"
+
 #include "UserManager.h"
 #include "User.h"
 
 #include "RoomManager.h"
 #include "Room.h"
-
-#include "RedisManager.h"
-#include "RedisLogin.h"
-#include "RedisTask.h"
 
 PacketManager::PacketManager() = default;
 
@@ -20,27 +18,23 @@ void PacketManager::Init(const UINT32 maxClient_)
 {
 	mRecvFunctionDictionary = unordered_map<int, PROCESS_RECV_PACKET_FUNCTION>();
 
+	mRecvFunctionDictionary[PACKET_ID::SYS_USER_CONNECT_RESPONSE] = &PacketManager::ProcessSysUserConnectResponse;
+
 	mRecvFunctionDictionary[PACKET_ID::SYS_USER_CONNECT] = &PacketManager::ProcessUserConnect;
 	mRecvFunctionDictionary[PACKET_ID::SYS_USER_DISCONNECT] = &PacketManager::ProcessUserDisConnect;
 
 	mRecvFunctionDictionary[PACKET_ID::LOGIN_REQUEST] = &PacketManager::ProcessLogin;
-	mRecvFunctionDictionary[RedisTaskID::RESPONSE_LOGIN] = &PacketManager::ProcessLoginDBResult;
+	mRecvFunctionDictionary[PACKET_ID::LOGIN_RESPONSE] = &PacketManager::ProcessLogin;
 
 	mRecvFunctionDictionary[PACKET_ID::ROOM_ENTER_REQUEST] = &PacketManager::ProcessEnterRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_LEAVE_REQUEST] = &PacketManager::ProcessLeaveRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_CHAT_REQUEST] = &PacketManager::ProcessRoomChatMessage;
 
 	CreateComponent(maxClient_);
-
-	mRedisManager = make_unique<RedisManager>();
 }
 
 bool PacketManager::Run()
 {
-	// TODO : 하드코딩 제거
-	if (mRedisManager->Run("127.0.0.1", 6379, 1) == false)
-		return false;
-
 	mIsRunProcessThread = true;
 	mProcessThread = thread([this]() { ProcessPacket(); });
 
@@ -49,8 +43,6 @@ bool PacketManager::Run()
 
 void PacketManager::End()
 {
-	mRedisManager->End();
-
 	mIsRunProcessThread = false;
 
 	if (mProcessThread.joinable())
@@ -155,14 +147,6 @@ void PacketManager::ProcessPacket()
 			ProcessRecvPacket(packetData.ClientIndex, packetData.PacketId, packetData.DataSize, packetData.pDataPtr);
 		}
 
-		if (auto task = mRedisManager->TakeResponseTask(); task.TaskID != RedisTaskID::INVALID)
-		{
-			isIdle = false;
-
-			ProcessRecvPacket(task.UserIndex, task.TaskID, task.DataSize, MakePacketBuffer(task.pData));
-			task.Release();
-		}
-
 		if (isIdle)
 		{
 			this_thread::sleep_for(chrono::milliseconds(1));
@@ -175,6 +159,16 @@ void PacketManager::ProcessRecvPacket(const UINT32 clientIndex_, const UINT16 pa
 	auto iter = mRecvFunctionDictionary.find(packetId_);
 	if (iter != mRecvFunctionDictionary.end())
 		(this->*(iter->second))(clientIndex_, packetSize_, pPacket_);
+}
+
+void PacketManager::ProcessSysUserConnectResponse(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
+{
+	SYS_CONNECT_RESPONSE_PACKET connectResPacket = {};
+	connectResPacket.PacketId = PACKET_ID::SYS_USER_CONNECT_RESPONSE;
+	connectResPacket.PacketLength = sizeof(SYS_CONNECT_RESPONSE_PACKET);
+
+	connectResPacket.ClientId = clientIndex_;
+	SendPacketFunc(clientIndex_, sizeof(SYS_CONNECT_RESPONSE_PACKET), MakePacketBuffer(connectResPacket));
 }
 
 void PacketManager::ProcessUserConnect(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
@@ -212,16 +206,11 @@ void PacketManager::ProcessLogin(UINT32 clientIndex_, UINT16 packetSize_, shared
 
 	if (mUserManager->FindUserIndexByID(pLoginReqPacket->UserID) == -1)
 	{
-		RedisLoginReq dbReq = {};
-		CopyMemory(dbReq.UserID, pLoginReqPacket->UserID, (MAX_USER_ID_LEN) + 1);
-		CopyMemory(dbReq.UserPW, pLoginReqPacket->UserPW, (MAX_USER_PW_LEN) + 1);
+		mUserManager->AddUser(make_shared<char>(*pLoginReqPacket->UserID), clientIndex_);
 
-		RedisTask task = {};
-		task.UserIndex = clientIndex_;
-		task.TaskID = RedisTaskID::REQUEST_LOGIN;
-		task.DataSize = sizeof(RedisLoginReq);
-		task.pData = make_shared<RedisLoginReq>(dbReq);
-		mRedisManager->PushTask(task);
+		loginResPacket.Result = ERROR_CODE::NONE;
+		SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
+		return;
 	}
 	else
 	{
@@ -235,18 +224,18 @@ void PacketManager::ProcessLoginDBResult(UINT32 clientIndex_, UINT16 packetSize_
 {
 	spdlog::info("ProcessLoginDBResult. UserIndex: {}", clientIndex_);
 
-	auto pBody = reinterpret_cast<RedisLoginRes*>(pPacket_.get());
+	//auto pBody = reinterpret_cast<RedisLoginRes*>(pPacket_.get());
 
-	if (pBody->Result == ERROR_CODE::NONE)
-	{
-		// 로그인 완료 처리
-	}
+	//if (pBody->Result == ERROR_CODE::NONE)
+	//{
+	//	// 로그인 완료 처리
+	//}
 
-	LOGIN_RESPONSE_PACKET loginResPacket = {};
-	loginResPacket.PacketId = PACKET_ID::LOGIN_RESPONSE;
-	loginResPacket.PacketLength = sizeof(LOGIN_RESPONSE_PACKET);
-	loginResPacket.Result = pBody->Result;
-	SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
+	//LOGIN_RESPONSE_PACKET loginResPacket = {};
+	//loginResPacket.PacketId = PACKET_ID::LOGIN_RESPONSE;
+	//loginResPacket.PacketLength = sizeof(LOGIN_RESPONSE_PACKET);
+	//loginResPacket.Result = pBody->Result;
+	//SendPacketFunc(clientIndex_, sizeof(LOGIN_RESPONSE_PACKET), MakePacketBuffer(loginResPacket));
 }
 
 void PacketManager::ProcessEnterRoom(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
