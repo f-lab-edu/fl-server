@@ -305,11 +305,6 @@ void PacketManager::ProcessRoomChatMessage(UINT32 clientIndex_, UINT16 packetSiz
 	pRoom->NotifyChat(clientIndex_, reqUser->GetUserId().c_str(), pRoomChatReqPacket->Message);
 }
 
-void PacketManager::ProcessRoomNewGuest(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
-{
-	NotifyNewGuest
-}
-
 void PacketManager::ProcessCharacterSync(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
 {
 	auto pCharacterSyncPacket = reinterpret_cast<CHARACTER_SYNC_PACKET*>(pPacket_.get());

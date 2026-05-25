@@ -149,6 +149,7 @@
     <ClCompile Include="..\src\ChatServer.cpp" />
     <ClCompile Include="..\src\ClientInfo.cpp" />
     <ClCompile Include="..\src\EchoServer.cpp" />
+    <ClCompile Include="..\src\GameServer.cpp" />
     <ClCompile Include="..\src\IOCPServer.cpp" />
     <ClCompile Include="..\src\Packet.cpp" />
     <ClCompile Include="..\src\PacketBuffer.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\includes\EchoServer.h" />
     <ClInclude Include="..\includes\Enums.h" />
     <ClInclude Include="..\includes\ErrorCode.h" />
+    <ClInclude Include="..\includes\GameServer.h" />
     <ClInclude Include="..\includes\IOCPServer.h" />
     <ClInclude Include="..\includes\IOOperation.h" />
     <ClInclude Include="..\includes\LoginPacket.h" />
