@@ -46,9 +46,6 @@
     <Filter Include="Enums">
       <UniqueIdentifier>{5a26339f-15ab-4733-bf72-063fd8cf8fb2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Managers\RedisManager">
-      <UniqueIdentifier>{8c6772d7-bcb2-4280-9b7a-f1d1298533a1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Managers\RoomManager">
       <UniqueIdentifier>{03cb6b38-e24f-4c0c-8c45-25a0b9d00565}</UniqueIdentifier>
     </Filter>
@@ -69,9 +66,6 @@
     </Filter>
     <Filter Include="ObjectModels\User">
       <UniqueIdentifier>{197a744b-853c-4af3-9adf-e19a4f6d0a53}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ObjectModels\Redis">
-      <UniqueIdentifier>{8f63a285-0b6c-4236-92e9-ae05c1b03b50}</UniqueIdentifier>
     </Filter>
     <Filter Include="ObjectModels\Room">
       <UniqueIdentifier>{b5b0d542-9d55-422a-adb3-d22e67878002}</UniqueIdentifier>
@@ -110,12 +104,6 @@
     </ClCompile>
     <ClCompile Include="..\src\UserManager.cpp">
       <Filter>Managers\UserManager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\RedisManager.cpp">
-      <Filter>Managers\RedisManager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\CRedisConn.cpp">
-      <Filter>Default</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Room.cpp">
       <Filter>ObjectModels\Room</Filter>
@@ -191,29 +179,17 @@
     <ClInclude Include="..\includes\Server_Function.h">
       <Filter>Default</Filter>
     </ClInclude>
-    <ClInclude Include="..\includes\PacketManager.h">
-      <Filter>Managers\PacketManager</Filter>
-    </ClInclude>
     <ClInclude Include="..\includes\UserManager.h">
       <Filter>Managers\UserManager</Filter>
-    </ClInclude>
-    <ClInclude Include="..\includes\RedisTask.h">
-      <Filter>ObjectModels\Redis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\includes\RedisTaskID.h">
-      <Filter>Enums</Filter>
-    </ClInclude>
-    <ClInclude Include="..\includes\RedisLogin.h">
-      <Filter>ObjectModels\Redis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\includes\RedisManager.h">
-      <Filter>Managers\RedisManager</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\Room.h">
       <Filter>ObjectModels\Room</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\RoomManager.h">
       <Filter>Managers\RoomManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\PacketManager.h">
+      <Filter>Managers\PacketManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
