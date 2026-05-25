@@ -31,7 +31,6 @@ void PacketManager::Init(const UINT32 maxClient_)
 	mRecvFunctionDictionary[PACKET_ID::ROOM_ENTER_REQUEST] = &PacketManager::ProcessEnterRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_LEAVE_REQUEST] = &PacketManager::ProcessLeaveRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_CHAT_REQUEST] = &PacketManager::ProcessRoomChatMessage;
-	mRecvFunctionDictionary[PACKET_ID::ROOM_NEW_GUEST_NOTIFY] = &PacketManager::ProcessRoomNewGuest;
 	
 	mRecvFunctionDictionary[PACKET_ID::CHARACTER_SYNC] = &PacketManager::ProcessCharacterSync;
 
