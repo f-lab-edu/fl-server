@@ -3,6 +3,8 @@
 #include "Room.h"
 #include "User.h"
 
+#include "CharacterSyncPacket.h"
+
 void Room::Init(const INT32 roomNum_, const INT32 maxUserCount_)
 {
 	mRoomNum = roomNum_;
@@ -11,23 +13,66 @@ void Room::Init(const INT32 roomNum_, const INT32 maxUserCount_)
 
 INT16 Room::EnterUser(shared_ptr<User> user_)
 {
-	if (mCurrentUserCount >= mMaxUserCount)
-		return ERROR_CODE::ENTER_ROOM_FULL_USER;
+	vector<shared_ptr<User>> existingUsers;
 
-	mUserList.push_back(user_);
-	++mCurrentUserCount;
+	{
+		lock_guard<mutex> lock(m_RoomLock);
 
-	user_->EnterRoom(mRoomNum);
+		if (mCurrentUserCount >= mMaxUserCount)
+			return ERROR_CODE::ENTER_ROOM_FULL_USER;
+
+		existingUsers.reserve(mUserList.size());
+		for(const auto& pUser : mUserList)
+		{
+			if (pUser != nullptr)
+				existingUsers.push_back(pUser);
+		}
+
+		mUserList.push_back(user_);
+		++mCurrentUserCount;
+
+		user_->EnterRoom(mRoomNum);
+	}
+
+	for (auto& pOldUser : existingUsers)
+	{
+		ROOM_NEW_GUEST_PACKET oldUserPkt = {};
+		oldUserPkt.PacketId = PACKET_ID::ROOM_NEW_GUEST_NOTIFY;
+		oldUserPkt.PacketLength = sizeof(ROOM_NEW_GUEST_PACKET);
+		oldUserPkt.ClientIndex = pOldUser->GetNetConnIdx();
+		strncpy_s(oldUserPkt.UserID, sizeof(oldUserPkt.UserID), pOldUser->GetUserId().c_str(), _TRUNCATE);
+
+		SendPacketFunc(user_->GetNetConnIdx(), sizeof(ROOM_NEW_GUEST_PACKET), MakePacketBuffer(oldUserPkt));
+	}
+
+	ROOM_NEW_GUEST_PACKET newGuestPkt = {};
+	newGuestPkt.PacketId = PACKET_ID::ROOM_NEW_GUEST_NOTIFY;
+	newGuestPkt.PacketLength = sizeof(ROOM_NEW_GUEST_PACKET);
+	newGuestPkt.ClientIndex = user_->GetNetConnIdx();
+	strncpy_s(newGuestPkt.UserID, sizeof(newGuestPkt.UserID), user_->GetUserId().c_str(), _TRUNCATE);
+
+	shared_ptr<char[]> sharedNewGuestPkt = MakePacketBuffer(newGuestPkt);
+
+	SendToAllUser(sizeof(ROOM_NEW_GUEST_PACKET), sharedNewGuestPkt, user_->GetNetConnIdx(), true);
 
 	return ERROR_CODE::NONE;
 }
 
 void Room::LeaveUser(shared_ptr<User> leaveUser_)
 {
+	lock_guard<mutex> lock(m_RoomLock);
+
+	const auto beforeSize = mUserList.size();
+
 	mUserList.remove_if([leaveUserId = leaveUser_->GetUserId()](shared_ptr<User> pUser)
 		{
 			return leaveUserId == pUser->GetUserId();
 		});
+
+	const auto afterSize = mUserList.size();
+
+	if (beforeSize > afterSize)
+		mCurrentUserCount -= static_cast<UINT16>(beforeSize - afterSize);
 }
 
 void Room::NotifyChat(INT32 clientIndex_, const char* userID_, const char* msg_)
@@ -41,13 +86,39 @@ void Room::NotifyChat(INT32 clientIndex_, const char* userID_, const char* msg_)
 	SendToAllUser(sizeof(roomChatNtfyPkt), MakePacketBuffer(roomChatNtfyPkt), clientIndex_, false);
 }
 
+void Room::NotifyNewGuest(INT32 clientIndex_, const char* userID_)
+{
+	ROOM_NEW_GUEST_PACKET roomNewGuestPkt = {};
+	roomNewGuestPkt.PacketId = PACKET_ID::ROOM_NEW_GUEST_NOTIFY;
+	roomNewGuestPkt.PacketLength = sizeof(ROOM_NEW_GUEST_PACKET);
+	roomNewGuestPkt.ClientIndex = clientIndex_;
+
+	CopyMemory(roomNewGuestPkt.UserID, userID_, sizeof(roomNewGuestPkt.UserID));
+	SendToAllUser(sizeof(roomNewGuestPkt), MakePacketBuffer(roomNewGuestPkt), clientIndex_, false);
+}
+
+void Room::CharacterSync(INT32 clientIndex_, shared_ptr<char[]> pData)
+{
+	SendToAllUser(sizeof(CHARACTER_SYNC_PACKET), pData, clientIndex_, false);
+}
+
 void Room::SendToAllUser(const UINT16 dataSize_, shared_ptr<char[]> data_, const INT32 passUserIndex_, bool exceptMe)
 {
-	for (auto& pUser : mUserList)
-	{
-		if (pUser == nullptr)
-			continue;
+	vector<shared_ptr<User>> userListSnapshot;
 
+	{
+		lock_guard<mutex> lock(m_RoomLock);
+		userListSnapshot.reserve(mUserList.size());
+
+		for (const auto& pUser : mUserList)
+		{
+			if (pUser != nullptr)
+				userListSnapshot.push_back(pUser);
+		}
+	}
+
+	for (auto& pUser : userListSnapshot)
+	{
 		if (exceptMe && pUser->GetNetConnIdx() == passUserIndex_)
 			continue;
 
