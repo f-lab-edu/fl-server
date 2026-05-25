@@ -10,6 +10,8 @@
 #include "RoomManager.h"
 #include "Room.h"
 
+#include "CharacterSyncPacket.h"
+
 PacketManager::PacketManager() = default;
 
 PacketManager::~PacketManager() = default;
@@ -29,6 +31,9 @@ void PacketManager::Init(const UINT32 maxClient_)
 	mRecvFunctionDictionary[PACKET_ID::ROOM_ENTER_REQUEST] = &PacketManager::ProcessEnterRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_LEAVE_REQUEST] = &PacketManager::ProcessLeaveRoom;
 	mRecvFunctionDictionary[PACKET_ID::ROOM_CHAT_REQUEST] = &PacketManager::ProcessRoomChatMessage;
+	mRecvFunctionDictionary[PACKET_ID::ROOM_NEW_GUEST_NOTIFY] = &PacketManager::ProcessRoomNewGuest;
+	
+	mRecvFunctionDictionary[PACKET_ID::CHARACTER_SYNC] = &PacketManager::ProcessCharacterSync;
 
 	CreateComponent(maxClient_);
 }
@@ -135,7 +140,7 @@ void PacketManager::ProcessPacket()
 	{
 		bool isIdle = true;
 
-		if (auto packetData = DequePacketData(); packetData.PacketId > (UINT16)PACKET_ID::SYS_END)
+		if (auto packetData = DequePacketData(); packetData.PacketId > PACKET_ID::SYS_END)
 		{
 			isIdle = false;
 			ProcessRecvPacket(packetData.ClientIndex, packetData.PacketId, packetData.DataSize, packetData.pDataPtr);
@@ -299,3 +304,27 @@ void PacketManager::ProcessRoomChatMessage(UINT32 clientIndex_, UINT16 packetSiz
 
 	pRoom->NotifyChat(clientIndex_, reqUser->GetUserId().c_str(), pRoomChatReqPacket->Message);
 }
+
+void PacketManager::ProcessRoomNewGuest(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
+{
+	NotifyNewGuest
+}
+
+void PacketManager::ProcessCharacterSync(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_)
+{
+	auto pCharacterSyncPacket = reinterpret_cast<CHARACTER_SYNC_PACKET*>(pPacket_.get());
+
+	CHARACTER_SYNC_PACKET characterSyncBroadCastPacket = {};
+	characterSyncBroadCastPacket = *pCharacterSyncPacket;
+	characterSyncBroadCastPacket.PacketId = PACKET_ID::CHARACTER_SYNC_BROADCAST;
+
+	auto reqUser = mUserManager->GetUserByConnIdx(clientIndex_);
+	auto roomNum = reqUser->GetCurrentRoom();
+
+	auto pRoom = mRoomManager->GetRoomByNumber(roomNum);
+	if (pRoom == nullptr)
+		return;
+
+	pRoom->CharacterSync(clientIndex_, MakePacketBuffer(characterSyncBroadCastPacket));
+}
+

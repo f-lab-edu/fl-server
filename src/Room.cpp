@@ -3,6 +3,8 @@
 #include "Room.h"
 #include "User.h"
 
+#include "CharacterSyncPacket.h"
+
 void Room::Init(const INT32 roomNum_, const INT32 maxUserCount_)
 {
 	mRoomNum = roomNum_;
@@ -39,6 +41,21 @@ void Room::NotifyChat(INT32 clientIndex_, const char* userID_, const char* msg_)
 	CopyMemory(roomChatNtfyPkt.Msg, msg_, sizeof(roomChatNtfyPkt.Msg));
 	CopyMemory(roomChatNtfyPkt.UserID, userID_, sizeof(roomChatNtfyPkt.UserID));
 	SendToAllUser(sizeof(roomChatNtfyPkt), MakePacketBuffer(roomChatNtfyPkt), clientIndex_, false);
+}
+
+void Room::NotifyNewGuest(INT32 clientIndex_, const char* userID_)
+{
+	ROOM_NEW_GUEST_PACKET roomNewGuestPkt = {};
+	roomNewGuestPkt.PacketId = PACKET_ID::ROOM_NEW_GUEST_NOTIFY;
+	roomNewGuestPkt.PacketLength = sizeof(ROOM_NEW_GUEST_PACKET);
+
+	CopyMemory(roomNewGuestPkt.UserID, userID_, sizeof(roomNewGuestPkt.UserID));
+	SendToAllUser(sizeof(roomNewGuestPkt), MakePacketBuffer(roomNewGuestPkt), clientIndex_, false);
+}
+
+void Room::CharacterSync(INT32 clientIndex_, shared_ptr<char[]> pData)
+{
+	SendToAllUser(sizeof(CHARACTER_SYNC_PACKET), pData, clientIndex_, false);
 }
 
 void Room::SendToAllUser(const UINT16 dataSize_, shared_ptr<char[]> data_, const INT32 passUserIndex_, bool exceptMe)

@@ -48,6 +48,9 @@ private:
 	void ProcessEnterRoom(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 	void ProcessLeaveRoom(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 	void ProcessRoomChatMessage(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+	void ProcessRoomNewGuest(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
+
+	void ProcessCharacterSync(UINT32 clientIndex_, UINT16 packetSize_, shared_ptr<char[]> pPacket_);
 
 private:
 	using PROCESS_RECV_PACKET_FUNCTION = void(PacketManager::*)(UINT32, UINT16, shared_ptr<char[]>);

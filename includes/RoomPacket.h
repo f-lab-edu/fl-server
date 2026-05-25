@@ -21,4 +21,10 @@ struct ROOM_LEAVE_RESPONSE_PACKET : public PACKET_HEADER
 {
 	INT16 Result = { 0 };
 };
+
+struct ROOM_NEW_GUEST_PACKET : public PACKET_HEADER
+{
+	INT32 ClientIndex = { 0 };
+	char UserID[MAX_USER_ID_LEN + 1] = { 0, };
+};
 #pragma pack(pop)

@@ -20,6 +20,10 @@ public:
 
 	void NotifyChat(INT32 clientIndex_, const char* userID_, const char* msg_);
 
+	void NotifyNewGuest(INT32 clientIndex_, const char* userID_);
+
+	void CharacterSync(INT32 clientIndex_, shared_ptr<char[]> pData);
+
 	function<void(UINT32, UINT32, shared_ptr<char[]>)> SendPacketFunc;
 
 private:
