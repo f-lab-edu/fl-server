@@ -254,7 +254,7 @@ void PacketManager::ProcessEnterRoom(UINT32 clientIndex_, UINT16 packetSize_, sh
 
 	ROOM_ENTER_RESPONSE_PACKET roomEnterResPacket = {};
 	roomEnterResPacket.PacketId = PACKET_ID::ROOM_ENTER_RESPONSE;
-
+	roomEnterResPacket.PacketLength = sizeof(ROOM_ENTER_RESPONSE_PACKET);
 	roomEnterResPacket.Result = mRoomManager->EnterUser(pRoomEnterReqPacket->RoomNumber, pReqUser);
 
 	SendPacketFunc(clientIndex_, sizeof(ROOM_ENTER_RESPONSE_PACKET), MakePacketBuffer(roomEnterResPacket));
