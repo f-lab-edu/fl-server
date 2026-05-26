@@ -51,8 +51,6 @@ PacketInfo PacketBuffer::GetPacket()
 
 	auto pHeader = (PACKET_HEADER*)GetPtr(mPacketDataBufferRPos);
 
-	mPacketDataBufferRPos += pHeader->PacketLength;
-
 	if (pHeader->PacketLength > remainByte)
 		return PacketInfo();
 
@@ -61,6 +59,8 @@ PacketInfo PacketBuffer::GetPacket()
 	packetInfo.DataSize = pHeader->PacketLength;
 	packetInfo.pDataPtr = make_shared<char[]>(pHeader->PacketLength);
 	CopyMemory(packetInfo.pDataPtr.get(), GetPtr(mPacketDataBufferRPos), pHeader->PacketLength);
+
+	mPacketDataBufferRPos += pHeader->PacketLength;
 
 	return packetInfo;
 }
