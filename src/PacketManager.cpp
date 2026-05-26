@@ -310,6 +310,7 @@ void PacketManager::ProcessCharacterSync(UINT32 clientIndex_, UINT16 packetSize_
 
 	CHARACTER_SYNC_PACKET characterSyncBroadCastPacket = {};
 	characterSyncBroadCastPacket = *pCharacterSyncPacket;
+	characterSyncBroadCastPacket.PacketLength = sizeof(CHARACTER_SYNC_PACKET);
 	characterSyncBroadCastPacket.PacketId = PACKET_ID::CHARACTER_SYNC_BROADCAST;
 
 	auto reqUser = mUserManager->GetUserByConnIdx(clientIndex_);

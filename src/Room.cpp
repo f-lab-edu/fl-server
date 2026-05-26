@@ -64,9 +64,9 @@ void Room::LeaveUser(shared_ptr<User> leaveUser_)
 
 	const auto beforeSize = mUserList.size();
 
-	mUserList.remove_if([leaveUserId = leaveUser_->GetUserId()](shared_ptr<User> pUser)
+	mUserList.remove_if([leaveClientId = leaveUser_->GetNetConnIdx()](shared_ptr<User> pUser)
 		{
-			return leaveUserId == pUser->GetUserId();
+			return leaveClientId == pUser->GetNetConnIdx();
 		});
 
 	const auto afterSize = mUserList.size();
@@ -78,11 +78,11 @@ void Room::LeaveUser(shared_ptr<User> leaveUser_)
 		for (auto& pStayUser : mUserList)
 		{
 			ROOM_LEAVE_PACKET stayUserPkt = {};
-			stayUserPkt.PacketId = PACKET_ID::ROOM_JOIN_NOTIFY;
+			stayUserPkt.PacketId = PACKET_ID::ROOM_LEAVE_NOTIFY;
 			stayUserPkt.PacketLength = sizeof(ROOM_JOIN_PACKET);
-			stayUserPkt.ClientIndex = pStayUser->GetNetConnIdx();
+			stayUserPkt.ClientIndex = leaveUser_->GetNetConnIdx();
 
-			SendPacketFunc(leaveUser_->GetNetConnIdx(), sizeof(ROOM_JOIN_PACKET), MakePacketBuffer(stayUserPkt));
+			SendPacketFunc(pStayUser->GetNetConnIdx(), sizeof(ROOM_JOIN_PACKET), MakePacketBuffer(stayUserPkt));
 		}
 	}
 }
