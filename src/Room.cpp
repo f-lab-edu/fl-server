@@ -45,15 +45,7 @@ INT16 Room::EnterUser(shared_ptr<User> user_)
 		SendPacketFunc(user_->GetNetConnIdx(), sizeof(ROOM_JOIN_PACKET), MakePacketBuffer(oldUserPkt));
 	}
 
-	ROOM_JOIN_PACKET newGuestPkt = {};
-	newGuestPkt.PacketId = PACKET_ID::ROOM_JOIN_NOTIFY;
-	newGuestPkt.PacketLength = sizeof(ROOM_JOIN_PACKET);
-	newGuestPkt.ClientIndex = user_->GetNetConnIdx();
-	strncpy_s(newGuestPkt.UserID, sizeof(newGuestPkt.UserID), user_->GetUserId().c_str(), _TRUNCATE);
-
-	shared_ptr<char[]> sharedNewGuestPkt = MakePacketBuffer(newGuestPkt);
-
-	SendToAllUser(sizeof(ROOM_JOIN_PACKET), sharedNewGuestPkt, user_->GetNetConnIdx(), true);
+	NotifyNewGuest(user_->GetNetConnIdx(), user_->GetUserId().c_str());
 
 	return ERROR_CODE::NONE;
 }
@@ -100,13 +92,15 @@ void Room::NotifyChat(INT32 clientIndex_, const char* userID_, const char* msg_)
 
 void Room::NotifyNewGuest(INT32 clientIndex_, const char* userID_)
 {
-	ROOM_JOIN_PACKET roomNewGuestPkt = {};
-	roomNewGuestPkt.PacketId = PACKET_ID::ROOM_JOIN_NOTIFY;
-	roomNewGuestPkt.PacketLength = sizeof(ROOM_JOIN_PACKET);
-	roomNewGuestPkt.ClientIndex = clientIndex_;
+	ROOM_JOIN_PACKET newGuestPkt = {};
+	newGuestPkt.PacketId = PACKET_ID::ROOM_JOIN_NOTIFY;
+	newGuestPkt.PacketLength = sizeof(ROOM_JOIN_PACKET);
+	newGuestPkt.ClientIndex = clientIndex_;
+	strncpy_s(newGuestPkt.UserID, sizeof(newGuestPkt.UserID), userID_, _TRUNCATE);
 
-	CopyMemory(roomNewGuestPkt.UserID, userID_, sizeof(roomNewGuestPkt.UserID));
-	SendToAllUser(sizeof(roomNewGuestPkt), MakePacketBuffer(roomNewGuestPkt), clientIndex_, false);
+	shared_ptr<char[]> sharedNewGuestPkt = MakePacketBuffer(newGuestPkt);
+
+	SendToAllUser(sizeof(ROOM_JOIN_PACKET), sharedNewGuestPkt, clientIndex_, true);
 }
 
 void Room::CharacterSync(INT32 clientIndex_, shared_ptr<char[]> pData)
