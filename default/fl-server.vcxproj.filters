@@ -73,6 +73,12 @@
     <Filter Include="ObjectModels\Packet\System">
       <UniqueIdentifier>{1b29f083-7b28-47d0-bbe4-e80425df8479}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Services\GameServer">
+      <UniqueIdentifier>{aa190176-8835-4d6d-ade5-e4b04c6e71be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObjectModels\Packet\CharacterSync">
+      <UniqueIdentifier>{cbce80f2-fae0-45cf-8550-d6976e8cd440}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -113,6 +119,9 @@
     </ClCompile>
     <ClCompile Include="..\src\RoomManager.cpp">
       <Filter>Managers\RoomManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GameServer.cpp">
+      <Filter>Services\GameServer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -194,9 +203,14 @@
     <ClInclude Include="..\includes\PacketManager.h">
       <Filter>Managers\PacketManager</Filter>
     </ClInclude>
-    <ClInclude Include="..\includes\CharacterSyncPacket.h" />
     <ClInclude Include="..\includes\Sys_ConnectResponsePacket.h">
       <Filter>ObjectModels\Packet\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\CharacterSyncPacket.h">
+      <Filter>ObjectModels\Packet\CharacterSync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\GameServer.h">
+      <Filter>Services\GameServer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

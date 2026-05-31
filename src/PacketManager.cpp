@@ -312,6 +312,9 @@ void PacketManager::ProcessCharacterSync(UINT32 clientIndex_, UINT16 packetSize_
 	characterSyncBroadCastPacket = *pCharacterSyncPacket;
 	characterSyncBroadCastPacket.PacketLength = sizeof(CHARACTER_SYNC_PACKET);
 	characterSyncBroadCastPacket.PacketId = PACKET_ID::CHARACTER_SYNC_BROADCAST;
+	
+	auto now = chrono::steady_clock::now().time_since_epoch();
+	characterSyncBroadCastPacket.TimeStamp = static_cast<UINT32>(chrono::duration_cast<chrono::milliseconds>(now).count());
 
 	auto reqUser = mUserManager->GetUserByConnIdx(clientIndex_);
 	auto roomNum = reqUser->GetCurrentRoom();
